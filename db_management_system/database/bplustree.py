@@ -84,9 +84,16 @@ class BPlusTree:
             return False
             
         deleted = self._delete(self.root, key)
+        
+        # If the root becomes empty but has a child, make the child the new root
+        if not self.root.keys and not self.root.is_leaf:
+            self.root = self.root.children[0]
+            
         return deleted
 
     def _delete(self, node, key):
+        min_keys = (self.order // 2) - 1 if self.order % 2 == 0 else self.order // 2
+
         if node.is_leaf:
             i = bisect.bisect_left(node.keys, key)
             if i < len(node.keys) and node.keys[i] == key:
@@ -96,7 +103,73 @@ class BPlusTree:
             return False
         else:
             i = bisect.bisect_right(node.keys, key)
-            return self._delete(node.children[i], key)
+            deleted = self._delete(node.children[i], key)
+            
+            if deleted:
+                if len(node.children[i].keys) < min_keys:
+                    self._fill_child(node, i)
+                    
+            return deleted
+
+    def _fill_child(self, node, index):
+        min_keys = (self.order // 2) - 1 if self.order % 2 == 0 else self.order // 2
+        
+        # Try borrowing from previous sibling
+        if index > 0 and len(node.children[index - 1].keys) > min_keys:
+            self._borrow_from_prev(node, index)
+            
+        # Try borrowing from next sibling
+        elif index < len(node.children) - 1 and len(node.children[index + 1].keys) > min_keys:
+            self._borrow_from_next(node, index)
+            
+        # Merge if borrowing is not possible
+        else:
+            if index < len(node.children) - 1:
+                self._merge(node, index)
+            else:
+                self._merge(node, index - 1)
+
+    def _borrow_from_prev(self, node, index):
+        child = node.children[index]
+        sibling = node.children[index - 1]
+        
+        if child.is_leaf:
+            child.keys.insert(0, sibling.keys.pop(-1))
+            child.children.insert(0, sibling.children.pop(-1))
+            node.keys[index - 1] = child.keys[0]
+        else:
+            child.keys.insert(0, node.keys[index - 1])
+            node.keys[index - 1] = sibling.keys.pop(-1)
+            child.children.insert(0, sibling.children.pop(-1))
+
+    def _borrow_from_next(self, node, index):
+        child = node.children[index]
+        sibling = node.children[index + 1]
+        
+        if child.is_leaf:
+            child.keys.append(sibling.keys.pop(0))
+            child.children.append(sibling.children.pop(0))
+            node.keys[index] = sibling.keys[0]
+        else:
+            child.keys.append(node.keys[index])
+            node.keys[index] = sibling.keys.pop(0)
+            child.children.append(sibling.children.pop(0))
+
+    def _merge(self, node, index):
+        child = node.children[index]
+        sibling = node.children[index + 1]
+        
+        if child.is_leaf:
+            child.keys.extend(sibling.keys)
+            child.children.extend(sibling.children)
+            child.next = sibling.next
+            node.keys.pop(index)
+            node.children.pop(index + 1)
+        else:
+            child.keys.append(node.keys.pop(index))
+            child.keys.extend(sibling.keys)
+            child.children.extend(sibling.children)
+            node.children.pop(index + 1)
 
     def update(self, key, new_value):
         node = self.root
