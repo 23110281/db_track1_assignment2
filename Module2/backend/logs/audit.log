@@ -1,0 +1,8 @@
+[2026-03-19 00:49:54] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully
+[2026-03-19 00:49:54] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-19 00:50:59] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully
+[2026-03-19 00:50:59] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-19 00:50:59] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/posts/] [IP:127.0.0.1] — POST /api/posts/ -> 404
+[2026-03-19 00:55:53] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully
+[2026-03-19 00:55:53] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-19 00:55:53] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/posts/] [IP:127.0.0.1] — POST /api/posts/ -> 404
