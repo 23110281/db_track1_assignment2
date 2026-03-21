@@ -2,16 +2,21 @@ import bisect
 import graphviz
 
 class BPlusTreeNode:
-    def __init__(self, is_leaf=False):
+    def __init__(self, order, is_leaf=False):
+        self.order = order
         self.is_leaf = is_leaf
         self.keys = []
         self.children = []
+        self.values = []  # Separate array for leaf nodes values
         self.next = None
 
+    def is_full(self):
+        return len(self.keys) == self.order - 1
+
 class BPlusTree:
-    def __init__(self, order=4):
-        self.root = BPlusTreeNode(is_leaf=True)
+    def __init__(self, order=8):
         self.order = order
+        self.root = BPlusTreeNode(order, is_leaf=True)
 
     def search(self, key):
         node = self.root
@@ -21,13 +26,13 @@ class BPlusTree:
         
         i = bisect.bisect_left(node.keys, key)
         if i < len(node.keys) and node.keys[i] == key:
-            return node.children[i]
+            return node.values[i]
         return None
 
     def insert(self, key, value):
         root = self.root
-        if len(root.keys) == self.order - 1:
-            new_root = BPlusTreeNode(is_leaf=False)
+        if root.is_full():
+            new_root = BPlusTreeNode(self.order, is_leaf=False)
             self.root = new_root
             new_root.children.append(root)
             self._split_child(new_root, 0)
@@ -39,13 +44,13 @@ class BPlusTree:
         if node.is_leaf:
             i = bisect.bisect_left(node.keys, key)
             if i < len(node.keys) and node.keys[i] == key:
-                node.children[i] = value
+                node.values[i] = value
             else:
                 node.keys.insert(i, key)
-                node.children.insert(i, value)
+                node.values.insert(i, value)
         else:
             i = bisect.bisect_right(node.keys, key)
-            if len(node.children[i].keys) == self.order - 1:
+            if node.children[i].is_full():
                 self._split_child(node, i)
                 if key > node.keys[i]:
                     i += 1
@@ -54,15 +59,14 @@ class BPlusTree:
     def _split_child(self, parent, index):
         order = self.order
         node = parent.children[index]
-        new_node = BPlusTreeNode(is_leaf=node.is_leaf)
-        
-        mid = order // 2
+        new_node = BPlusTreeNode(order, is_leaf=node.is_leaf)
         
         if node.is_leaf:
+            mid = len(node.keys) // 2
             new_node.keys = node.keys[mid:]
-            new_node.children = node.children[mid:]
+            new_node.values = node.values[mid:]
             node.keys = node.keys[:mid]
-            node.children = node.children[:mid]
+            node.values = node.values[:mid]
             
             new_node.next = node.next
             node.next = new_node
@@ -70,6 +74,7 @@ class BPlusTree:
             parent.keys.insert(index, new_node.keys[0])
             parent.children.insert(index + 1, new_node)
         else:
+            mid = len(node.keys) // 2
             new_node.keys = node.keys[mid+1:]
             new_node.children = node.children[mid+1:]
             up_key = node.keys[mid]
@@ -85,7 +90,6 @@ class BPlusTree:
             
         deleted = self._delete(self.root, key)
         
-        # If the root becomes empty but has a child, make the child the new root
         if not self.root.keys and not self.root.is_leaf:
             self.root = self.root.children[0]
             
@@ -98,7 +102,7 @@ class BPlusTree:
             i = bisect.bisect_left(node.keys, key)
             if i < len(node.keys) and node.keys[i] == key:
                 node.keys.pop(i)
-                node.children.pop(i)
+                node.values.pop(i)
                 return True
             return False
         else:
@@ -114,15 +118,10 @@ class BPlusTree:
     def _fill_child(self, node, index):
         min_keys = (self.order // 2) - 1 if self.order % 2 == 0 else self.order // 2
         
-        # Try borrowing from previous sibling
         if index > 0 and len(node.children[index - 1].keys) > min_keys:
             self._borrow_from_prev(node, index)
-            
-        # Try borrowing from next sibling
         elif index < len(node.children) - 1 and len(node.children[index + 1].keys) > min_keys:
             self._borrow_from_next(node, index)
-            
-        # Merge if borrowing is not possible
         else:
             if index < len(node.children) - 1:
                 self._merge(node, index)
@@ -135,7 +134,7 @@ class BPlusTree:
         
         if child.is_leaf:
             child.keys.insert(0, sibling.keys.pop(-1))
-            child.children.insert(0, sibling.children.pop(-1))
+            child.values.insert(0, sibling.values.pop(-1))
             node.keys[index - 1] = child.keys[0]
         else:
             child.keys.insert(0, node.keys[index - 1])
@@ -148,7 +147,7 @@ class BPlusTree:
         
         if child.is_leaf:
             child.keys.append(sibling.keys.pop(0))
-            child.children.append(sibling.children.pop(0))
+            child.values.append(sibling.values.pop(0))
             node.keys[index] = sibling.keys[0]
         else:
             child.keys.append(node.keys[index])
@@ -161,7 +160,7 @@ class BPlusTree:
         
         if child.is_leaf:
             child.keys.extend(sibling.keys)
-            child.children.extend(sibling.children)
+            child.values.extend(sibling.values)
             child.next = sibling.next
             node.keys.pop(index)
             node.children.pop(index + 1)
@@ -179,7 +178,7 @@ class BPlusTree:
         
         i = bisect.bisect_left(node.keys, key)
         if i < len(node.keys) and node.keys[i] == key:
-            node.children[i] = new_value
+            node.values[i] = new_value
             return True
         return False
 
@@ -191,7 +190,7 @@ class BPlusTree:
             
         results = []
         while node:
-            for k, v in zip(node.keys, node.children):
+            for k, v in zip(node.keys, node.values):
                 if start_key <= k <= end_key:
                     results.append((k, v))
                 elif k > end_key:
@@ -206,14 +205,14 @@ class BPlusTree:
             
         results = []
         while node:
-            for k, v in zip(node.keys, node.children):
+            for k, v in zip(node.keys, node.values):
                 results.append((k, v))
             node = node.next
         return results
 
     def visualize_tree(self):
         dot = graphviz.Digraph(comment='B+ Tree')
-        dot.attr(rankdir='TB')
+        dot.attr(rankdir='TB', nodesep='0.5', ranksep='1.0')
         if not self.root.keys:
             return dot
         self._add_nodes(dot, self.root)
@@ -228,7 +227,7 @@ class BPlusTree:
         while node:
             node_name = str(id(node))
             if prev_name:
-                dot.edge(prev_name, node_name, constraint='false', style='dashed')
+                dot.edge(f"{prev_name}:next", node_name, constraint='false', style='dashed', color='blue', penwidth='2.0', label='next')
             prev_name = node_name
             node = node.next
             
@@ -236,18 +235,40 @@ class BPlusTree:
 
     def _add_nodes(self, dot, node):
         node_name = str(id(node))
-        # Build strict valid HTML labels to bypass flat edge GraphViz bugs
-        cells = [f'<td port="f{i}">{str(k)}</td>' for i, k in enumerate(node.keys)]
-        html_label = f'<<table border="1" cellborder="1" cellspacing="0"><tr>{"".join(cells)}</tr></table>>'
-        dot.node(node_name, label=html_label, shape='none')
-        if not node.is_leaf:
+        
+        if node.is_leaf:
+            # Leaf node representation
+            # Row 1: Keys
+            # Row 2: Values (truncated if too long)
+            # Add a 'next' port at the end
+            html_parts = ['<<table border="0" cellborder="1" cellspacing="0" bgcolor="#e6ffe6"><tr>']
+            for i, k in enumerate(node.keys):
+                html_parts.append(f'<td port="k{i}"><b>{str(k)}</b></td>')
+            html_parts.append('<td port="next" rowspan="2" bgcolor="#ccffcc"><i>next</i></td>')
+            html_parts.append('</tr><tr>')
+            for i, v in enumerate(node.values):
+                val_str = str(v)
+                if len(val_str) > 10: val_str = val_str[:10] + '...'
+                html_parts.append(f'<td>{val_str}</td>')
+            html_parts.append('</tr></table>>')
+            dot.node(node_name, label="".join(html_parts), shape='none', margin='0')
+        else:
+            # Internal node representation
+            html_parts = ['<<table border="0" cellborder="1" cellspacing="0" bgcolor="#e6f2ff"><tr>']
+            for i, k in enumerate(node.keys):
+                html_parts.append(f'<td port="p{i}" bgcolor="#cce6ff">&bull;</td>')
+                html_parts.append(f'<td><b>{str(k)}</b></td>')
+            html_parts.append(f'<td port="p{len(node.keys)}" bgcolor="#cce6ff">&bull;</td>')
+            html_parts.append('</tr></table>>')
+            dot.node(node_name, label="".join(html_parts), shape='none', margin='0')
+            
             for child in node.children:
                 self._add_nodes(dot, child)
 
     def _add_edges(self, dot, node):
         if not node.is_leaf:
             node_name = str(id(node))
-            for child in node.children:
+            for i, child in enumerate(node.children):
                 child_name = str(id(child))
-                dot.edge(node_name, child_name)
+                dot.edge(f'{node_name}:p{i}', child_name)
                 self._add_edges(dot, child)
