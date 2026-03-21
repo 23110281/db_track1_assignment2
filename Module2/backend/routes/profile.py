@@ -21,6 +21,8 @@ def get_profile(member_id):
         'MemberType': member['MemberType'],
         'ContactNumber': member['ContactNumber'],
         'CreatedAt': str(member['CreatedAt']),
+        'Address': member.get('Address', ''),
+        'ShowAddress': bool(member.get('ShowAddress', False)),
         'avatarColor': member['AvatarColor'],
         'isAdmin': bool(member['IsAdmin']),
     }
@@ -79,6 +81,7 @@ def get_profile(member_id):
         'CreatedAt': str(p['CreatedAt']),
         'likes': p['likes'],
         'commentCount': p['commentCount'],
+        'GroupID': p['GroupID'],
         'GroupName': p['GroupName'],
     } for p in posts]
 

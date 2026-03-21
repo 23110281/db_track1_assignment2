@@ -17,7 +17,11 @@ def login():
     if not username or not password:
         return jsonify(error='Username and password required'), 400
 
-    member = query_db("SELECT * FROM Member WHERE Username = %s", (username,), one=True)
+    # Allow login with username or email
+    if '@' in username:
+        member = query_db("SELECT * FROM Member WHERE Email = %s", (username,), one=True)
+    else:
+        member = query_db("SELECT * FROM Member WHERE Username = %s", (username,), one=True)
     if not member or not check_password_hash(member['Password'], password):
         return jsonify(error='Invalid credentials'), 401
 
@@ -160,6 +164,60 @@ def verify_otp_endpoint():
         return jsonify(message=message, verified=True), 200
     else:
         return jsonify(error=message, verified=False), 400
+
+
+@auth_bp.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+
+    if not email:
+        return jsonify(error='Email is required'), 400
+
+    if not email.endswith('@iitgn.ac.in'):
+        return jsonify(error='Only @iitgn.ac.in email addresses are allowed'), 400
+
+    member = query_db("SELECT MemberID, Username FROM Member WHERE Email = %s", (email,), one=True)
+    if not member:
+        return jsonify(error='No account found with this email'), 404
+
+    from email_service import create_otp
+    success, message = create_otp(email)
+
+    if success:
+        log_action('FORGOT_PASSWORD', f"Password reset OTP sent to {email}", user=member['Username'])
+        return jsonify(message='OTP sent to your email'), 200
+    else:
+        return jsonify(error=message), 400
+
+
+@auth_bp.route('/reset-password', methods=['POST'])
+def reset_password():
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    otp = data.get('otp', '').strip()
+    new_password = data.get('newPassword', '')
+
+    if not all([email, otp, new_password]):
+        return jsonify(error='Email, OTP, and new password are required'), 400
+
+    if len(new_password) < 6:
+        return jsonify(error='Password must be at least 6 characters'), 400
+
+    from email_service import verify_otp
+    success, message = verify_otp(email, otp)
+    if not success:
+        return jsonify(error=message), 400
+
+    pw_hash = generate_password_hash(new_password)
+    execute_db("UPDATE Member SET Password = %s WHERE Email = %s", (pw_hash, email))
+
+    from email_service import clear_otp
+    clear_otp(email)
+
+    member = query_db("SELECT Username FROM Member WHERE Email = %s", (email,), one=True)
+    log_action('RESET_PASSWORD', f"Password reset for {email}", user=member['Username'] if member else 'unknown')
+    return jsonify(message='Password reset successfully'), 200
 
 
 @auth_bp.route('/isAuth', methods=['GET'])

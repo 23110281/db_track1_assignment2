@@ -233,10 +233,11 @@ function formatTime(dateStr) {
   return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-export default function PostCard({ post }) {
+export default function PostCard({ post, onPostUpdated, onPostDeleted }) {
   const { user } = useAuth();
   const author = post.author;
   const groupName = post.groupName;
+  const isOwnPost = user && author && user.MemberID === author.MemberID;
 
   const [liked, setLiked] = useState(post.liked || false);
   const [likeCount, setLikeCount] = useState(post.likes || 0);
@@ -247,6 +248,11 @@ export default function PostCard({ post }) {
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
+  const [lightbox, setLightbox] = useState(false);
+  const [postMenuOpen, setPostMenuOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState(false);
+  const [editPostText, setEditPostText] = useState(post.Content || '');
+  const [deleted, setDeleted] = useState(false);
 
   const handleLike = async () => {
     try {
@@ -324,24 +330,97 @@ export default function PostCard({ post }) {
     }
   };
 
+  const handleEditPost = async () => {
+    const trimmed = editPostText.trim();
+    if (!trimmed) return;
+    try {
+      await postsApi.update(post.PostID, trimmed);
+      post.Content = trimmed;
+      setEditingPost(false);
+      if (onPostUpdated) onPostUpdated(post.PostID, trimmed);
+    } catch (err) {
+      console.error('Failed to edit post:', err);
+    }
+  };
+
+  const handleDeletePost = async () => {
+    try {
+      await postsApi.delete(post.PostID);
+      setDeleted(true);
+      if (onPostDeleted) onPostDeleted(post.PostID);
+    } catch (err) {
+      console.error('Failed to delete post:', err);
+    }
+  };
+
   const totalComments = commentCount;
 
+  if (deleted) return null;
   if (!author) return null;
 
   return (
     <div style={styles.card}>
-      <div style={styles.header}>
-        <div style={{ ...styles.avatar, backgroundColor: author.avatarColor || '#4F46E5' }}>
-          {getInitials(author.Name)}
-        </div>
-        <div>
-          <div style={styles.authorName}>{author.Name}</div>
-          <div style={styles.meta}>
-            <span>{author.MemberType}</span>
-            <span>{'·'}</span>
-            <span>{formatTime(post.CreatedAt)}</span>
+      <div style={{ ...styles.header, justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ ...styles.avatar, backgroundColor: author.avatarColor || '#4F46E5' }}>
+            {getInitials(author.Name)}
+          </div>
+          <div>
+            <div style={styles.authorName}>{author.Name}</div>
+            <div style={styles.meta}>
+              <span>{author.MemberType}</span>
+              <span>{'·'}</span>
+              <span>{formatTime(post.CreatedAt)}</span>
+            </div>
           </div>
         </div>
+        {isOwnPost && (
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setPostMenuOpen(!postMenuOpen)}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: 32, height: 32, borderRadius: 8, border: 'none',
+                background: postMenuOpen ? '#F3F4F6' : 'transparent',
+                color: '#6b7280', cursor: 'pointer',
+              }}
+            >
+              <MoreVertical size={16} />
+            </button>
+            {postMenuOpen && (
+              <div style={{
+                position: 'absolute', right: 0, top: 36, zIndex: 10,
+                background: '#fff', borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                border: '1px solid #e5e7eb', overflow: 'hidden', minWidth: 130,
+              }}>
+                <button
+                  onClick={() => { setEditingPost(true); setEditPostText(post.Content || ''); setPostMenuOpen(false); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                    padding: '10px 14px', border: 'none', background: '#fff',
+                    fontSize: 13, fontWeight: 500, color: '#374151', cursor: 'pointer', textAlign: 'left',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#F9FAFB'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
+                >
+                  <Pencil size={14} /> Edit
+                </button>
+                <button
+                  onClick={() => { handleDeletePost(); setPostMenuOpen(false); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                    padding: '10px 14px', border: 'none', background: '#fff',
+                    fontSize: 13, fontWeight: 500, color: '#EF4444', cursor: 'pointer', textAlign: 'left',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#FEF2F2'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
+                >
+                  <Trash2 size={14} /> Delete
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {groupName && (
@@ -353,14 +432,86 @@ export default function PostCard({ post }) {
         </div>
       )}
 
-      {post.Content && <div style={styles.content}>{post.Content}</div>}
+      {editingPost ? (
+        <div style={{ marginBottom: 12 }}>
+          <textarea
+            value={editPostText}
+            onChange={e => setEditPostText(e.target.value)}
+            style={{
+              width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #4F46E5',
+              fontSize: 14, outline: 'none', minHeight: 60, resize: 'vertical',
+              fontFamily: 'inherit', boxSizing: 'border-box',
+            }}
+          />
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <button
+              onClick={handleEditPost}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px',
+                borderRadius: 8, border: 'none', background: '#4F46E5', color: '#fff',
+                cursor: 'pointer', fontSize: 13, fontWeight: 600,
+              }}
+            >
+              <Check size={14} /> Save
+            </button>
+            <button
+              onClick={() => setEditingPost(false)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px',
+                borderRadius: 8, border: '1px solid #d1d5db', background: '#fff',
+                color: '#6b7280', cursor: 'pointer', fontSize: 13, fontWeight: 600,
+              }}
+            >
+              <X size={14} /> Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        post.Content && <div style={styles.content}>{post.Content}</div>
+      )}
 
       {post.ImageURL && (
         <div style={{ marginBottom: 12 }}>
           <img
             src={post.ImageURL}
             alt="Post"
-            style={{ width: '100%', maxHeight: 400, objectFit: 'cover', borderRadius: 10, border: '1px solid #e5e7eb' }}
+            onClick={() => setLightbox(true)}
+            style={{ width: '100%', maxHeight: 400, objectFit: 'cover', borderRadius: 10, border: '1px solid #e5e7eb', cursor: 'pointer' }}
+          />
+        </div>
+      )}
+
+      {lightbox && (
+        <div
+          onClick={() => setLightbox(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 10000,
+            background: 'rgba(0,0,0,0.85)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'zoom-out',
+          }}
+        >
+          <button
+            onClick={() => setLightbox(false)}
+            style={{
+              position: 'absolute', top: 20, right: 20,
+              background: 'rgba(255,255,255,0.15)', border: 'none',
+              borderRadius: '50%', width: 40, height: 40,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: '#fff',
+            }}
+          >
+            <X size={22} />
+          </button>
+          <img
+            src={post.ImageURL}
+            alt="Post full view"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '90vw', maxHeight: '90vh',
+              objectFit: 'contain', borderRadius: 8,
+              cursor: 'default',
+            }}
           />
         </div>
       )}

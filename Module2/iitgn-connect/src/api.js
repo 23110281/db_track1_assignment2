@@ -37,6 +37,8 @@ export const authApi = {
   register: (data) => api('/auth/register', { method: 'POST', body: data }),
   sendOtp: (email) => api('/auth/send-otp', { method: 'POST', body: { email } }),
   verifyOtp: (email, otp) => api('/auth/verify-otp', { method: 'POST', body: { email, otp } }),
+  forgotPassword: (email) => api('/auth/forgot-password', { method: 'POST', body: { email } }),
+  resetPassword: (email, otp, newPassword) => api('/auth/reset-password', { method: 'POST', body: { email, otp, newPassword } }),
 };
 
 // Upload
@@ -70,9 +72,17 @@ export const postsApi = {
 export const groupsApi = {
   getAll: (search = '') => api(`/groups/?search=${encodeURIComponent(search)}`),
   getOne: (id) => api(`/groups/${id}`),
+  create: (data) => api('/groups/', { method: 'POST', body: data }),
+  update: (id, data) => api(`/groups/${id}`, { method: 'PUT', body: data }),
+  delete: (id) => api(`/groups/${id}`, { method: 'DELETE' }),
   join: (id) => api(`/groups/${id}/join`, { method: 'POST' }),
   leave: (id) => api(`/groups/${id}/leave`, { method: 'POST' }),
   getPosts: (id) => api(`/groups/${id}/posts`),
+  getPending: (id) => api(`/groups/${id}/pending`),
+  approve: (groupId, memberId) => api(`/groups/${groupId}/approve/${memberId}`, { method: 'POST' }),
+  reject: (groupId, memberId) => api(`/groups/${groupId}/reject/${memberId}`, { method: 'POST' }),
+  kick: (groupId, memberId) => api(`/groups/${groupId}/kick/${memberId}`, { method: 'POST' }),
+  makeAdmin: (groupId, memberId) => api(`/groups/${groupId}/make-admin/${memberId}`, { method: 'POST' }),
 };
 
 // Jobs
@@ -130,5 +140,6 @@ export const adminApi = {
 export const settingsApi = {
   updateProfile: (data) => api('/settings/profile', { method: 'PUT', body: data }),
   changePassword: (data) => api('/settings/password', { method: 'PUT', body: data }),
+  changeUsername: (data) => api('/settings/change-username', { method: 'PUT', body: data }),
   deleteAccount: () => api('/settings/account', { method: 'DELETE' }),
 };

@@ -33,6 +33,7 @@ def get_posts():
             FROM Post p
             JOIN Member m ON p.AuthorID = m.MemberID
             LEFT JOIN CampusGroup g ON p.GroupID = g.GroupID
+            WHERE p.GroupID IS NULL
             ORDER BY p.CreatedAt DESC
         """)
 

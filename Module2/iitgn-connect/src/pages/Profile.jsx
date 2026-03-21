@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Mail, Phone, Calendar, GraduationCap, Building2, Briefcase, BadgeCheck,
   BookOpen, Home, ThumbsUp, ThumbsDown, User, Users, Clock, Award,
@@ -162,6 +162,7 @@ const s = {
 export default function Profile() {
   const { memberId } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const id = memberId ? Number(memberId) : user?.MemberID;
   const isOwnProfile = user && id === user.MemberID;
 
@@ -304,6 +305,12 @@ export default function Profile() {
             <div style={s.iconWrap}><Calendar size={16} /></div>
             <span>Joined {formatDate(profile.CreatedAt)}</span>
           </div>
+          {profile.ShowAddress && profile.Address && (
+            <div style={s.infoItem}>
+              <div style={s.iconWrap}><Home size={16} /></div>
+              <span>{profile.Address}</span>
+            </div>
+          )}
         </div>
 
         {/* Subtype-specific info */}
@@ -625,7 +632,13 @@ export default function Profile() {
           <p style={s.empty}>No posts yet.</p>
         ) : (
           memberPosts.map(post => (
-            <div key={post.PostID} style={{ ...s.claimCard, marginBottom: 12 }}>
+            <div
+              key={post.PostID}
+              onClick={() => post.GroupID ? navigate(`/groups/${post.GroupID}`) : navigate('/')}
+              style={{ ...s.claimCard, marginBottom: 12, cursor: 'pointer', transition: 'background 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#F3F4F6'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#F9FAFB'; }}
+            >
               <div style={{ fontSize: 14, color: '#374151', marginBottom: 8 }}>{post.Content}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 12, color: '#9ca3af' }}>
                 <span>{formatDate(post.CreatedAt)}</span>

@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Settings as SettingsIcon, User, Lock, Bell, Shield, Trash2,
-  Save, Check, Eye, EyeOff,
+  Save, Check, Eye, EyeOff, MapPin, AtSign,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { settingsApi } from '../api';
+import { settingsApi, authApi } from '../api';
 
 /* ── styles ── */
 const s = {
@@ -60,8 +60,17 @@ const s = {
     transition: 'border-color 0.2s',
     boxSizing: 'border-box',
   },
-  inputFocus: {
-    borderColor: '#4F46E5',
+  inputDisabled: {
+    width: '100%',
+    padding: '10px 14px',
+    border: '1.5px solid #E5E7EB',
+    borderRadius: 10,
+    fontSize: 14,
+    outline: 'none',
+    boxSizing: 'border-box',
+    background: '#F3F4F6',
+    color: '#9CA3AF',
+    cursor: 'not-allowed',
   },
   textarea: {
     width: '100%',
@@ -97,6 +106,19 @@ const s = {
     cursor: 'pointer',
     transition: 'background 0.2s',
   },
+  btnSecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 8,
+    padding: '10px 24px',
+    background: '#E5E7EB',
+    color: '#374151',
+    border: 'none',
+    borderRadius: 10,
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
   btnDanger: {
     display: 'inline-flex',
     alignItems: 'center',
@@ -131,15 +153,8 @@ const s = {
     padding: '12px 0',
     borderBottom: '1px solid #F3F4F6',
   },
-  toggleLabel: {
-    fontSize: 14,
-    color: '#374151',
-  },
-  toggleDesc: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    marginTop: 2,
-  },
+  toggleLabel: { fontSize: 14, color: '#374151' },
+  toggleDesc: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
   toast: {
     position: 'fixed',
     bottom: 32,
@@ -156,7 +171,6 @@ const s = {
     gap: 8,
     boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
     zIndex: 9999,
-    animation: 'fadeIn 0.3s ease',
   },
   dangerZone: {
     background: '#FEF2F2',
@@ -214,9 +228,7 @@ const s = {
     gap: 12,
     justifyContent: 'flex-end',
   },
-  passwordWrap: {
-    position: 'relative',
-  },
+  passwordWrap: { position: 'relative' },
   eyeBtn: {
     position: 'absolute',
     right: 12,
@@ -229,36 +241,40 @@ const s = {
     padding: 0,
     display: 'flex',
   },
+  hint: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 4,
+  },
+  errorText: {
+    color: '#DC2626',
+    fontSize: 13,
+    marginBottom: 12,
+  },
+  successText: {
+    color: '#059669',
+    fontSize: 13,
+    marginBottom: 12,
+  },
 };
 
-/* ── Toggle Switch component ── */
+/* ── Toggle Switch ── */
 function Toggle({ checked, onChange }) {
   return (
     <button
       onClick={() => onChange(!checked)}
       style={{
-        width: 48,
-        height: 26,
-        borderRadius: 13,
+        width: 48, height: 26, borderRadius: 13,
         background: checked ? '#4F46E5' : '#D1D5DB',
-        border: 'none',
-        cursor: 'pointer',
-        position: 'relative',
-        transition: 'background 0.2s',
-        flexShrink: 0,
+        border: 'none', cursor: 'pointer', position: 'relative',
+        transition: 'background 0.2s', flexShrink: 0,
       }}
     >
       <span
         style={{
-          position: 'absolute',
-          top: 3,
-          left: checked ? 24 : 3,
-          width: 20,
-          height: 20,
-          borderRadius: '50%',
-          background: '#fff',
-          transition: 'left 0.2s',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+          position: 'absolute', top: 3, left: checked ? 24 : 3,
+          width: 20, height: 20, borderRadius: '50%', background: '#fff',
+          transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
         }}
       />
     </button>
@@ -272,10 +288,28 @@ export default function Settings() {
   /* Profile form */
   const [profile, setProfile] = useState({
     name: user?.Name || '',
-    email: user?.Email || '',
     contact: user?.ContactNumber || '',
-    bio: user?.Bio || '',
+    address: user?.Address || '',
+    showAddress: user?.ShowAddress || false,
   });
+
+  /* Username change */
+  const [usernameForm, setUsernameForm] = useState({
+    newUsername: user?.Username || '',
+    otpSent: false,
+    otp: '',
+    loading: false,
+    error: '',
+    success: '',
+    countdown: 0,
+  });
+
+  useEffect(() => {
+    if (usernameForm.countdown > 0) {
+      const t = setTimeout(() => setUsernameForm(p => ({ ...p, countdown: p.countdown - 1 })), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [usernameForm.countdown]);
 
   /* Password form */
   const [passwords, setPasswords] = useState({ current: '', newPw: '', confirm: '' });
@@ -284,69 +318,106 @@ export default function Settings() {
 
   /* Notification prefs */
   const [notifs, setNotifs] = useState({
-    email: true,
-    postLikes: true,
-    comments: true,
-    groupActivity: false,
-    jobAlerts: true,
+    email: true, postLikes: true, comments: true, groupActivity: false, jobAlerts: true,
   });
 
   /* Privacy prefs */
   const [privacy, setPrivacy] = useState({
-    showEmail: true,
-    showContact: false,
-    allowQnA: true,
+    showEmail: true, showContact: false, allowQnA: true,
   });
 
-  /* Toast */
+  /* Toast + Delete modal */
   const [toast, setToast] = useState('');
-  const showToast = (msg) => {
-    setToast(msg);
-    setTimeout(() => setToast(''), 2500);
-  };
-
-  /* Delete modal */
+  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 2500); };
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  /* ── handlers ── */
+  /* ── Profile save ── */
   const handleProfileSave = async (e) => {
     e.preventDefault();
     try {
-      await settingsApi.updateProfile({ name: profile.name, email: profile.email, contact: profile.contact });
-      setUser(prev => ({ ...prev, Name: profile.name, Email: profile.email, ContactNumber: profile.contact }));
+      await settingsApi.updateProfile({
+        name: profile.name,
+        contact: profile.contact,
+        address: profile.address,
+        showAddress: profile.showAddress,
+      });
+      setUser(prev => ({
+        ...prev,
+        Name: profile.name,
+        ContactNumber: profile.contact,
+        Address: profile.address,
+        ShowAddress: profile.showAddress,
+      }));
       showToast('Profile updated successfully!');
     } catch (err) {
-      showToast(err.response?.data?.error || 'Failed to update profile.');
+      showToast(err.message || 'Failed to update profile.');
     }
   };
 
+  /* ── Username change with OTP ── */
+  const handleSendUsernameOtp = async () => {
+    const uf = usernameForm;
+    if (!uf.newUsername.trim() || uf.newUsername.trim() === user?.Username) {
+      setUsernameForm(p => ({ ...p, error: 'Enter a new username different from current.' }));
+      return;
+    }
+    if (uf.newUsername.trim().length < 3) {
+      setUsernameForm(p => ({ ...p, error: 'Username must be at least 3 characters.' }));
+      return;
+    }
+    setUsernameForm(p => ({ ...p, loading: true, error: '', success: '' }));
+    try {
+      await authApi.forgotPassword(user.Email.toLowerCase());
+      setUsernameForm(p => ({ ...p, otpSent: true, loading: false, countdown: 60 }));
+    } catch (err) {
+      setUsernameForm(p => ({ ...p, error: err.message, loading: false }));
+    }
+  };
+
+  const handleChangeUsername = async () => {
+    const uf = usernameForm;
+    if (!uf.otp.trim()) {
+      setUsernameForm(p => ({ ...p, error: 'Enter the OTP sent to your email.' }));
+      return;
+    }
+    setUsernameForm(p => ({ ...p, loading: true, error: '' }));
+    try {
+      const res = await settingsApi.changeUsername({
+        username: uf.newUsername.trim(),
+        otp: uf.otp.trim(),
+        email: user.Email.toLowerCase(),
+      });
+      setUser(prev => ({ ...prev, Username: res.username }));
+      setUsernameForm(p => ({ ...p, loading: false, otpSent: false, otp: '', success: 'Username changed!', error: '' }));
+      showToast('Username changed successfully!');
+    } catch (err) {
+      setUsernameForm(p => ({ ...p, error: err.message, loading: false }));
+    }
+  };
+
+  /* ── Password change ── */
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     setPwError('');
-    if (passwords.newPw.length < 6) {
-      setPwError('New password must be at least 6 characters.');
-      return;
-    }
-    if (passwords.newPw !== passwords.confirm) {
-      setPwError('New passwords do not match.');
-      return;
-    }
+    if (passwords.newPw.length < 6) { setPwError('New password must be at least 6 characters.'); return; }
+    if (passwords.newPw !== passwords.confirm) { setPwError('New passwords do not match.'); return; }
     try {
       await settingsApi.changePassword({ currentPassword: passwords.current, newPassword: passwords.newPw });
       setPasswords({ current: '', newPw: '', confirm: '' });
       showToast('Password changed successfully!');
     } catch (err) {
-      setPwError(err.response?.data?.error || 'Failed to change password.');
+      setPwError(err.message || 'Failed to change password.');
     }
   };
 
+  /* ── Delete account ── */
   const handleDeleteAccount = async () => {
     setShowDeleteModal(false);
     try {
       await settingsApi.deleteAccount();
       logout();
     } catch (err) {
-      showToast(err.response?.data?.error || 'Failed to delete account.');
+      showToast(err.message || 'Failed to delete account.');
     }
   };
 
@@ -355,7 +426,6 @@ export default function Settings() {
 
   return (
     <div style={s.page}>
-      {/* Header */}
       <h1 style={s.heading}>
         <SettingsIcon size={28} color="#4F46E5" />
         Settings
@@ -382,31 +452,40 @@ export default function Settings() {
             <div style={s.fieldGroup}>
               <label style={s.label}>Email</label>
               <input
-                style={s.input}
+                style={s.inputDisabled}
                 type="email"
-                value={profile.email}
-                onChange={(e) => pf('email', e.target.value)}
-                placeholder="you@iitgn.ac.in"
+                value={user?.Email || ''}
+                disabled
+              />
+              <p style={s.hint}>Email cannot be changed</p>
+            </div>
+          </div>
+          <div style={s.row}>
+            <div style={s.fieldGroup}>
+              <label style={s.label}>Contact Number</label>
+              <input
+                style={s.input}
+                value={profile.contact}
+                onChange={(e) => pf('contact', e.target.value)}
+                placeholder="+91 XXXXX XXXXX"
+              />
+            </div>
+            <div style={s.fieldGroup}>
+              <label style={s.label}>Address</label>
+              <input
+                style={s.input}
+                value={profile.address}
+                onChange={(e) => pf('address', e.target.value)}
+                placeholder="e.g. Room 301, Hostel 14, IITGN"
               />
             </div>
           </div>
-          <div style={s.fieldGroup}>
-            <label style={s.label}>Contact Number</label>
-            <input
-              style={s.input}
-              value={profile.contact}
-              onChange={(e) => pf('contact', e.target.value)}
-              placeholder="+91 XXXXX XXXXX"
-            />
-          </div>
-          <div style={s.fieldGroup}>
-            <label style={s.label}>Bio</label>
-            <textarea
-              style={s.textarea}
-              value={profile.bio}
-              onChange={(e) => pf('bio', e.target.value)}
-              placeholder="Write something about yourself..."
-            />
+          <div style={{ ...s.fieldGroup, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Toggle checked={profile.showAddress} onChange={(v) => pf('showAddress', v)} />
+            <div>
+              <div style={s.toggleLabel}>Show address on profile</div>
+              <div style={s.toggleDesc}>Allow others to see your address on your profile page</div>
+            </div>
           </div>
           <button type="submit" style={s.btn}>
             <Save size={16} /> Save Changes
@@ -414,11 +493,85 @@ export default function Settings() {
         </form>
       </div>
 
-      {/* ── 2. Account Settings ── */}
+      {/* ── 2. Change Username (with OTP) ── */}
+      <div style={s.card}>
+        <h2 style={s.cardTitle}>
+          <AtSign size={20} color="#4F46E5" />
+          Change Username
+        </h2>
+        <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 16 }}>
+          For security, an OTP will be sent to your email to confirm the change.
+        </p>
+        <div style={s.fieldGroup}>
+          <label style={s.label}>Current Username</label>
+          <input style={s.inputDisabled} value={user?.Username || ''} disabled />
+        </div>
+        <div style={s.fieldGroup}>
+          <label style={s.label}>New Username</label>
+          <input
+            style={s.input}
+            value={usernameForm.newUsername}
+            onChange={(e) => setUsernameForm(p => ({ ...p, newUsername: e.target.value, error: '', success: '' }))}
+            placeholder="Enter new username"
+          />
+        </div>
+
+        {usernameForm.otpSent && (
+          <div style={s.fieldGroup}>
+            <label style={s.label}>Enter OTP (sent to {user?.Email})</label>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input
+                style={{ ...s.input, letterSpacing: 4, fontWeight: 700, textAlign: 'center', maxWidth: 200 }}
+                value={usernameForm.otp}
+                onChange={(e) => setUsernameForm(p => ({ ...p, otp: e.target.value.replace(/\D/g, '').slice(0, 6), error: '' }))}
+                placeholder="6-digit OTP"
+                maxLength={6}
+              />
+              <button
+                type="button"
+                onClick={handleSendUsernameOtp}
+                disabled={usernameForm.countdown > 0}
+                style={{
+                  ...s.btnSecondary,
+                  opacity: usernameForm.countdown > 0 ? 0.5 : 1,
+                  cursor: usernameForm.countdown > 0 ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {usernameForm.countdown > 0 ? `${usernameForm.countdown}s` : 'Resend'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {usernameForm.error && <p style={s.errorText}>{usernameForm.error}</p>}
+        {usernameForm.success && <p style={s.successText}>{usernameForm.success}</p>}
+
+        {!usernameForm.otpSent ? (
+          <button
+            type="button"
+            style={{ ...s.btn, opacity: usernameForm.loading ? 0.7 : 1 }}
+            onClick={handleSendUsernameOtp}
+            disabled={usernameForm.loading}
+          >
+            {usernameForm.loading ? 'Sending OTP...' : 'Send OTP to Verify'}
+          </button>
+        ) : (
+          <button
+            type="button"
+            style={{ ...s.btn, opacity: usernameForm.loading ? 0.7 : 1 }}
+            onClick={handleChangeUsername}
+            disabled={usernameForm.loading}
+          >
+            {usernameForm.loading ? 'Changing...' : 'Confirm Username Change'}
+          </button>
+        )}
+      </div>
+
+      {/* ── 3. Account Settings (Password) ── */}
       <div style={s.card}>
         <h2 style={s.cardTitle}>
           <Lock size={20} color="#4F46E5" />
-          Account Settings
+          Change Password
         </h2>
         <form onSubmit={handlePasswordChange}>
           {['current', 'newPw', 'confirm'].map((field) => {
@@ -445,16 +598,14 @@ export default function Settings() {
               </div>
             );
           })}
-          {pwError && (
-            <p style={{ color: '#DC2626', fontSize: 13, marginBottom: 12 }}>{pwError}</p>
-          )}
+          {pwError && <p style={s.errorText}>{pwError}</p>}
           <button type="submit" style={s.btn}>
             <Lock size={16} /> Change Password
           </button>
         </form>
       </div>
 
-      {/* ── 3. Notification Preferences ── */}
+      {/* ── 4. Notification Preferences ── */}
       <div style={s.card}>
         <h2 style={s.cardTitle}>
           <Bell size={20} color="#4F46E5" />
@@ -477,7 +628,7 @@ export default function Settings() {
         ))}
       </div>
 
-      {/* ── 4. Privacy Settings ── */}
+      {/* ── 5. Privacy Settings ── */}
       <div style={s.card}>
         <h2 style={s.cardTitle}>
           <Shield size={20} color="#4F46E5" />
@@ -498,7 +649,7 @@ export default function Settings() {
         ))}
       </div>
 
-      {/* ── 5. Danger Zone ── */}
+      {/* ── 6. Danger Zone ── */}
       <div style={s.dangerZone}>
         <h2 style={s.dangerTitle}>
           <Trash2 size={20} />

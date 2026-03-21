@@ -55,6 +55,8 @@ def run():
             MemberType ENUM('Student','Professor','Alumni','Organization') NOT NULL,
             ContactNumber VARCHAR(15),
             CreatedAt DATE NOT NULL,
+            Address VARCHAR(255) DEFAULT '',
+            ShowAddress BOOLEAN DEFAULT FALSE,
             AvatarColor VARCHAR(10) DEFAULT '#4F46E5',
             IsAdmin BOOLEAN DEFAULT FALSE
         )
@@ -154,6 +156,8 @@ def run():
             Name VARCHAR(100) NOT NULL,
             Description TEXT,
             AdminID INT,
+            IsRestricted BOOLEAN DEFAULT FALSE,
+            CreatedAt DATE DEFAULT (CURDATE()),
             FOREIGN KEY (AdminID) REFERENCES Member(MemberID) ON DELETE SET NULL
         )
     """)
@@ -163,6 +167,7 @@ def run():
             GroupID INT NOT NULL,
             MemberID INT NOT NULL,
             Role ENUM('Admin','Moderator','Member') DEFAULT 'Member',
+            Status ENUM('approved','pending','rejected') DEFAULT 'approved',
             JoinedAt DATE NOT NULL,
             PRIMARY KEY (GroupID, MemberID),
             FOREIGN KEY (GroupID) REFERENCES CampusGroup(GroupID) ON DELETE CASCADE,
@@ -352,8 +357,8 @@ def run():
 
     members = [
         (1, 'laksh_jain', 'Laksh Jain', 'laksh.jain@iitgn.ac.in', pw, 'Student', '9876543210', '2025-08-15', '#4F46E5', False),
-        (2, 'parthiv_p', 'Parthiv Patel', 'parthiv.patel@iitgn.ac.in', pw, 'Student', '9876543211', '2025-08-15', '#059669', False),
-        (3, 'ridham_p', 'Ridham Patel', 'ridham.patel@iitgn.ac.in', pw, 'Student', '9876543212', '2025-08-15', '#DC2626', False),
+        (2, 'parthiv_p', 'Parthiv Patel', 'parthiv.p@iitgn.ac.in', pw, 'Student', '9876543211', '2025-08-15', '#059669', False),
+        (3, 'ridham_p', 'Ridham Patel', 'ridham.p@iitgn.ac.in', pw, 'Student', '9876543212', '2025-08-15', '#DC2626', False),
         (4, 'rudra_s', 'Rudra Singh', 'rudra.singh@iitgn.ac.in', pw, 'Student', '9876543213', '2025-08-15', '#D97706', False),
         (5, 'shriniket_b', 'Shriniket Behera', 'shriniket.b@iitgn.ac.in', pw, 'Student', '9876543214', '2025-08-15', '#7C3AED', False),
         (6, 'prof_yogesh', 'Dr. Yogesh K. Meena', 'yogesh.meena@iitgn.ac.in', pw, 'Professor', '9876543215', '2020-01-10', '#0891B2', False),

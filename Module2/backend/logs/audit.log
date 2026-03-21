@@ -6,3 +6,94 @@
 [2026-03-19 00:55:53] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully
 [2026-03-19 00:55:53] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
 [2026-03-19 00:55:53] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/posts/] [IP:127.0.0.1] — POST /api/posts/ -> 404
+[2026-03-21 16:16:40] [INFO] [USER:anonymous] [ACTION:SEND_OTP] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — OTP sent to ridham.patel@iitgn.ac.in
+[2026-03-21 16:16:40] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — POST /api/auth/send-otp -> 200
+[2026-03-21 18:58:07] [INFO] [USER:anonymous] [ACTION:SEND_OTP] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — OTP sent to ridham.patel@iitgn.ac.in
+[2026-03-21 18:58:07] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — POST /api/auth/send-otp -> 200
+[2026-03-21 18:59:22] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/verify-otp] [IP:127.0.0.1] — POST /api/auth/verify-otp -> 400
+[2026-03-21 19:02:21] [INFO] [USER:anonymous] [ACTION:SEND_OTP] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — OTP sent to ridham.patel@iitgn.ac.in
+[2026-03-21 19:02:21] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — POST /api/auth/send-otp -> 200
+[2026-03-21 19:02:33] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/verify-otp] [IP:127.0.0.1] — POST /api/auth/verify-otp -> 400
+[2026-03-21 19:03:06] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/verify-otp] [IP:127.0.0.1] — POST /api/auth/verify-otp -> 400
+[2026-03-21 19:03:08] [INFO] [USER:anonymous] [ACTION:VERIFY_OTP] [ENDPOINT:/api/auth/verify-otp] [IP:127.0.0.1] — Email ridham.patel@iitgn.ac.in verified successfully
+[2026-03-21 19:03:08] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/verify-otp] [IP:127.0.0.1] — POST /api/auth/verify-otp -> 200
+[2026-03-21 19:03:41] [INFO] [USER:Patel] [ACTION:REGISTER] [ENDPOINT:/api/auth/register] [IP:127.0.0.1] — New Student registered: 'Patel' (ID: 12)
+[2026-03-21 19:03:41] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/register] [IP:127.0.0.1] — POST /api/auth/register -> 201
+[2026-03-21 19:03:54] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 401
+[2026-03-21 19:04:03] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 401
+[2026-03-21 19:04:04] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 401
+[2026-03-21 19:04:13] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 401
+[2026-03-21 19:05:01] [INFO] [USER:Patel] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'Patel' logged in successfully
+[2026-03-21 19:05:01] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-21 19:05:32] [INFO] [USER:Patel] [ACTION:UPDATE_PROFILE] [ENDPOINT:/api/settings/profile] [IP:127.0.0.1] — Updated profile settings: Name, Email
+[2026-03-21 19:05:32] [INFO] [USER:Patel] [ACTION:PUT] [ENDPOINT:/api/settings/profile] [IP:127.0.0.1] — PUT /api/settings/profile -> 200
+[2026-03-21 19:05:47] [INFO] [USER:Patel] [ACTION:UPDATE_PROFILE] [ENDPOINT:/api/settings/profile] [IP:127.0.0.1] — Updated profile settings: Name, Email
+[2026-03-21 19:05:47] [INFO] [USER:Patel] [ACTION:PUT] [ENDPOINT:/api/settings/profile] [IP:127.0.0.1] — PUT /api/settings/profile -> 200
+[2026-03-21 19:05:53] [INFO] [USER:Patel] [ACTION:UPDATE_PROFILE] [ENDPOINT:/api/settings/profile] [IP:127.0.0.1] — Updated profile settings: Name, Email
+[2026-03-21 19:05:53] [INFO] [USER:Patel] [ACTION:PUT] [ENDPOINT:/api/settings/profile] [IP:127.0.0.1] — PUT /api/settings/profile -> 200
+[2026-03-21 19:09:59] [INFO] [USER:Patel] [ACTION:POST] [ENDPOINT:/api/upload] [IP:127.0.0.1] — POST /api/upload -> 201
+[2026-03-21 19:09:59] [INFO] [USER:Patel] [ACTION:CREATE_POST] [ENDPOINT:/api/posts] [IP:127.0.0.1] — Created post 9 in group None
+[2026-03-21 19:09:59] [INFO] [USER:Patel] [ACTION:POST] [ENDPOINT:/api/posts] [IP:127.0.0.1] — POST /api/posts -> 201
+[2026-03-21 19:14:29] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully
+[2026-03-21 19:14:29] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-21 19:27:29] [INFO] [USER:uid:12] [ACTION:DELETE_ACCOUNT] [ENDPOINT:/api/settings/account] [IP:127.0.0.1] — User deleted their own account (MemberID: 12)
+[2026-03-21 19:27:29] [INFO] [USER:uid:12] [ACTION:DELETE] [ENDPOINT:/api/settings/account] [IP:127.0.0.1] — DELETE /api/settings/account -> 200
+[2026-03-21 19:27:50] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 401
+[2026-03-21 19:28:23] [INFO] [USER:anonymous] [ACTION:SEND_OTP] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — OTP sent to ridham.patel@iitgn.ac.in
+[2026-03-21 19:28:23] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — POST /api/auth/send-otp -> 200
+[2026-03-21 19:29:10] [INFO] [USER:anonymous] [ACTION:VERIFY_OTP] [ENDPOINT:/api/auth/verify-otp] [IP:127.0.0.1] — Email ridham.patel@iitgn.ac.in verified successfully
+[2026-03-21 19:29:10] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/verify-otp] [IP:127.0.0.1] — POST /api/auth/verify-otp -> 200
+[2026-03-21 19:29:11] [INFO] [USER:ridhamp4] [ACTION:REGISTER] [ENDPOINT:/api/auth/register] [IP:127.0.0.1] — New Student registered: 'ridhamp4' (ID: 12)
+[2026-03-21 19:29:11] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/register] [IP:127.0.0.1] — POST /api/auth/register -> 201
+[2026-03-21 19:29:27] [INFO] [USER:ridhamp4] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'ridhamp4' logged in successfully
+[2026-03-21 19:29:27] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-21 19:29:55] [INFO] [USER:ridhamp4] [ACTION:UPDATE_PROFILE] [ENDPOINT:/api/settings/profile] [IP:127.0.0.1] — Updated profile settings: Name, ContactNumber, Address, ShowAddress
+[2026-03-21 19:29:55] [INFO] [USER:ridhamp4] [ACTION:PUT] [ENDPOINT:/api/settings/profile] [IP:127.0.0.1] — PUT /api/settings/profile -> 200
+[2026-03-21 19:30:39] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/upload] [IP:127.0.0.1] — POST /api/upload -> 201
+[2026-03-21 19:30:39] [INFO] [USER:ridhamp4] [ACTION:CREATE_POST] [ENDPOINT:/api/posts] [IP:127.0.0.1] — Created post 9 in group None
+[2026-03-21 19:30:39] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/posts] [IP:127.0.0.1] — POST /api/posts -> 201
+[2026-03-21 19:30:44] [INFO] [USER:ridhamp4] [ACTION:LIKE_POST] [ENDPOINT:/api/posts/9/like] [IP:127.0.0.1] — Liked post 9
+[2026-03-21 19:30:44] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/posts/9/like] [IP:127.0.0.1] — POST /api/posts/9/like -> 200
+[2026-03-21 19:38:17] [INFO] [USER:ridhamp4] [ACTION:JOIN_GROUP] [ENDPOINT:/api/groups/1/join] [IP:127.0.0.1] — Joined group 1
+[2026-03-21 19:38:17] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/groups/1/join] [IP:127.0.0.1] — POST /api/groups/1/join -> 200
+[2026-03-21 19:38:24] [INFO] [USER:ridhamp4] [ACTION:CREATE_POST] [ENDPOINT:/api/posts] [IP:127.0.0.1] — Created post 10 in group 1
+[2026-03-21 19:38:24] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/posts] [IP:127.0.0.1] — POST /api/posts -> 201
+[2026-03-21 19:41:20] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully
+[2026-03-21 19:41:20] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-21 20:05:31] [INFO] [USER:laksh_jain] [ACTION:CREATE_GROUP] [ENDPOINT:/api/groups/] [IP:127.0.0.1] — Created group 6: Test Restricted Group
+[2026-03-21 20:05:31] [INFO] [USER:laksh_jain] [ACTION:POST] [ENDPOINT:/api/groups/] [IP:127.0.0.1] — POST /api/groups/ -> 201
+[2026-03-21 20:05:31] [WARNING] [USER:laksh_jain] [ACTION:POST] [ENDPOINT:/api/groups/] [IP:127.0.0.1] — DB audit log failed — POST /api/groups/ -> 201
+[2026-03-21 20:07:28] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 401
+[2026-03-21 20:07:28] [WARNING] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — DB audit log failed — POST /api/auth/login -> 401
+[2026-03-21 20:07:37] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 401
+[2026-03-21 20:07:37] [WARNING] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — DB audit log failed — POST /api/auth/login -> 401
+[2026-03-21 20:07:55] [INFO] [USER:ridham_p] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'ridham_p' logged in successfully
+[2026-03-21 20:07:55] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-21 20:07:55] [WARNING] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — DB audit log failed — POST /api/auth/login -> 200
+[2026-03-21 20:08:06] [INFO] [USER:ridham_p] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'ridham_p' logged in successfully
+[2026-03-21 20:08:06] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-21 20:08:06] [WARNING] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — DB audit log failed — POST /api/auth/login -> 200
+[2026-03-21 20:08:07] [INFO] [USER:ridham_p] [ACTION:JOIN_REQUEST] [ENDPOINT:/api/groups/6/join] [IP:127.0.0.1] — Requested to join restricted group 6
+[2026-03-21 20:08:07] [INFO] [USER:ridham_p] [ACTION:POST] [ENDPOINT:/api/groups/6/join] [IP:127.0.0.1] — POST /api/groups/6/join -> 200
+[2026-03-21 20:08:07] [WARNING] [USER:ridham_p] [ACTION:POST] [ENDPOINT:/api/groups/6/join] [IP:127.0.0.1] — DB audit log failed — POST /api/groups/6/join -> 200
+[2026-03-21 20:08:36] [INFO] [USER:laksh_jain] [ACTION:APPROVE_JOIN] [ENDPOINT:/api/groups/6/approve/3] [IP:127.0.0.1] — Approved member 3 for group 6
+[2026-03-21 20:08:36] [INFO] [USER:laksh_jain] [ACTION:POST] [ENDPOINT:/api/groups/6/approve/3] [IP:127.0.0.1] — POST /api/groups/6/approve/3 -> 200
+[2026-03-21 20:08:36] [WARNING] [USER:laksh_jain] [ACTION:POST] [ENDPOINT:/api/groups/6/approve/3] [IP:127.0.0.1] — DB audit log failed — POST /api/groups/6/approve/3 -> 200
+[2026-03-21 20:11:51] [INFO] [USER:ridhamp4] [ACTION:JOIN_REQUEST] [ENDPOINT:/api/groups/6/join] [IP:127.0.0.1] — Requested to join restricted group 6
+[2026-03-21 20:11:51] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/groups/6/join] [IP:127.0.0.1] — POST /api/groups/6/join -> 200
+[2026-03-21 20:11:51] [WARNING] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/groups/6/join] [IP:127.0.0.1] — DB audit log failed — POST /api/groups/6/join -> 200
+[2026-03-21 20:12:24] [INFO] [USER:laksh_jain] [ACTION:APPROVE_JOIN] [ENDPOINT:/api/groups/6/approve/12] [IP:127.0.0.1] — Approved member 12 for group 6
+[2026-03-21 20:12:24] [INFO] [USER:laksh_jain] [ACTION:POST] [ENDPOINT:/api/groups/6/approve/12] [IP:127.0.0.1] — POST /api/groups/6/approve/12 -> 200
+[2026-03-21 20:12:24] [WARNING] [USER:laksh_jain] [ACTION:POST] [ENDPOINT:/api/groups/6/approve/12] [IP:127.0.0.1] — DB audit log failed — POST /api/groups/6/approve/12 -> 200
+[2026-03-21 20:15:30] [INFO] [USER:ridhamp4] [ACTION:CREATE_GROUP] [ENDPOINT:/api/groups/] [IP:127.0.0.1] — Created group 7: Tech Council
+[2026-03-21 20:15:30] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/groups/] [IP:127.0.0.1] — POST /api/groups/ -> 201
+[2026-03-21 20:15:30] [WARNING] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/groups/] [IP:127.0.0.1] — DB audit log failed — POST /api/groups/ -> 201
+[2026-03-21 20:27:09] [INFO] [USER:laksh_jain] [ACTION:UPDATE_GROUP] [ENDPOINT:/api/groups/6] [IP:127.0.0.1] — Updated group 6
+[2026-03-21 20:27:09] [INFO] [USER:laksh_jain] [ACTION:PUT] [ENDPOINT:/api/groups/6] [IP:127.0.0.1] — PUT /api/groups/6 -> 200
+[2026-03-21 20:27:09] [WARNING] [USER:laksh_jain] [ACTION:PUT] [ENDPOINT:/api/groups/6] [IP:127.0.0.1] — DB audit log failed — PUT /api/groups/6 -> 200
+[2026-03-21 20:38:14] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully
+[2026-03-21 20:38:14] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-21 20:38:14] [WARNING] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — DB audit log failed — POST /api/auth/login -> 200
+[2026-03-21 20:38:35] [INFO] [USER:laksh_jain] [ACTION:TRANSFER_ADMIN] [ENDPOINT:/api/groups/1/make-admin/2] [IP:127.0.0.1] — Transferred admin of group 1 to member 2
+[2026-03-21 20:38:35] [INFO] [USER:laksh_jain] [ACTION:POST] [ENDPOINT:/api/groups/1/make-admin/2] [IP:127.0.0.1] — POST /api/groups/1/make-admin/2 -> 200
+[2026-03-21 20:38:35] [WARNING] [USER:laksh_jain] [ACTION:POST] [ENDPOINT:/api/groups/1/make-admin/2] [IP:127.0.0.1] — DB audit log failed — POST /api/groups/1/make-admin/2 -> 200

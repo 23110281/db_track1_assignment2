@@ -43,5 +43,6 @@ const styles = {
     marginLeft: 250,
     padding: 24,
     minHeight: 'calc(100vh - 60px)',
+    overflow: 'hidden',
   },
 };

@@ -144,6 +144,12 @@ export default function Feed() {
               <PostCard
                 key={`post-${post.PostID}`}
                 post={post}
+                onPostUpdated={(id, newContent) => {
+                  setPosts(prev => prev.map(p => p.PostID === id ? { ...p, Content: newContent } : p));
+                }}
+                onPostDeleted={(id) => {
+                  setPosts(prev => prev.filter(p => p.PostID !== id));
+                }}
               />
             );
           } else {

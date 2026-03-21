@@ -801,6 +801,17 @@ export default function Register() {
             )}
           </div>
 
+          {/* Email warning */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+            padding: '0.5rem 0.75rem', background: '#FEF3C7',
+            border: '1px solid #FDE68A', borderRadius: '0.5rem',
+            fontSize: '0.78rem', color: '#92400E',
+          }}>
+            <AlertCircle size={14} style={{ flexShrink: 0 }} />
+            <span>Your email address cannot be changed after registration.</span>
+          </div>
+
           {/* Password */}
           <div style={styles.row}>
             <div style={styles.inputGroup}>

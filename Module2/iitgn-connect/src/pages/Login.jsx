@@ -229,10 +229,10 @@ export default function Login() {
           )}
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Username</label>
+            <label style={styles.label}>Username or Email</label>
             <input
               type="text"
-              placeholder="e.g. laksh_jain"
+              placeholder="e.g. laksh_jain or name@iitgn.ac.in"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               onFocus={() => setFocusedField('username')}
@@ -267,17 +267,22 @@ export default function Login() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '-0.25rem' }}>
-            <input
-              type="checkbox"
-              id="rememberMe"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              style={{ width: '16px', height: '16px', accentColor: '#3b82f6', cursor: 'pointer' }}
-            />
-            <label htmlFor="rememberMe" style={{ fontSize: '0.85rem', color: '#475569', cursor: 'pointer', userSelect: 'none' }}>
-              Remember my credentials
-            </label>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '-0.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <input
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                style={{ width: '16px', height: '16px', accentColor: '#3b82f6', cursor: 'pointer' }}
+              />
+              <label htmlFor="rememberMe" style={{ fontSize: '0.85rem', color: '#475569', cursor: 'pointer', userSelect: 'none' }}>
+                Remember me
+              </label>
+            </div>
+            <Link to="/forgot-password" style={{ fontSize: '0.85rem', color: '#3b82f6', fontWeight: '600', textDecoration: 'none' }}>
+              Forgot password?
+            </Link>
           </div>
 
           <button
