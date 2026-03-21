@@ -2,7 +2,7 @@ from functools import wraps
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from db import query_db, execute_db
-from audit import log_action, get_current_username
+from audit import log_action, log_to_db, get_current_username
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -12,8 +12,18 @@ def admin_required(fn):
     @jwt_required()
     def wrapper(*args, **kwargs):
         user_id = int(get_jwt_identity())
-        member = query_db("SELECT IsAdmin FROM Member WHERE MemberID = %s", (user_id,), one=True)
+        member = query_db("SELECT IsAdmin, Username FROM Member WHERE MemberID = %s", (user_id,), one=True)
         if not member or not member['IsAdmin']:
+            username = member['Username'] if member else f'uid:{user_id}'
+            log_action('FORBIDDEN_ACCESS', f"Non-admin user '{username}' attempted {request.method} {request.path}", user=username)
+            log_to_db(
+                username=username,
+                action='FORBIDDEN_ACCESS',
+                endpoint=request.path,
+                ip=request.remote_addr or '127.0.0.1',
+                details=f"Non-admin user '{username}' tried to access admin endpoint {request.path}",
+                is_authorized=False,
+            )
             return jsonify(error='Admin access required'), 403
         return fn(*args, **kwargs)
     return wrapper

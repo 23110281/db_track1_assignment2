@@ -304,55 +304,80 @@ def run():
     """)
 
     # --- Triggers for detecting unauthorized direct DB modifications ---
-    # Drop existing triggers first
-    cursor.execute("DROP TRIGGER IF EXISTS trg_member_delete_audit")
-    cursor.execute("DROP TRIGGER IF EXISTS trg_member_update_audit")
+    # Covers INSERT, UPDATE, DELETE on ALL tables (except AuditLog itself).
+    # When operations come through the Flask API, @app_username is set via
+    # session variables → IsAuthorized = TRUE.
+    # Direct SQL access (MySQL CLI, phpMyAdmin, scripts) won't have @app_username
+    # set → logged as 'DIRECT_DB_ACCESS' with IsAuthorized = FALSE.
 
-    # Trigger: log direct DELETE on Member table
-    # When a member is deleted directly (not through the API), the Username
-    # will be recorded as 'DIRECT_DB_ACCESS' and IsAuthorized = FALSE.
-    # API-based deletes log via the Python audit module before the DELETE executes.
-    cursor.execute("""
-        CREATE TRIGGER trg_member_delete_audit
-        BEFORE DELETE ON Member
-        FOR EACH ROW
-        BEGIN
-            INSERT INTO AuditLog (Timestamp, Username, Action, Endpoint, IPAddress, Details, IsAuthorized)
-            VALUES (
-                NOW(),
-                COALESCE(@app_username, 'DIRECT_DB_ACCESS'),
-                'DELETE_MEMBER',
-                COALESCE(@app_endpoint, 'DIRECT_SQL'),
-                COALESCE(@app_ip, 'N/A'),
-                CONCAT('Member deleted: ', OLD.Username, ' (ID: ', OLD.MemberID, ', Type: ', OLD.MemberType, ')'),
-                IF(@app_username IS NOT NULL, TRUE, FALSE)
-            );
-        END
-    """)
+    trigger_tables = [
+        # (table_name, pk_col, detail_col)
+        ('Member',              'MemberID',      'Username'),
+        ('Student',             'MemberID',      'MemberID'),
+        ('Professor',           'MemberID',      'MemberID'),
+        ('Alumni',              'MemberID',      'MemberID'),
+        ('Organization',        'MemberID',      'MemberID'),
+        ('Course',              'CourseID',       'CourseName'),
+        ('Enrollment',          'StudentID',     'CourseID'),
+        ('ClassAttendance',     'AttendanceID',  'StudentID'),
+        ('MessAttendance',      'MessRecordID',  'StudentID'),
+        ('CampusGroup',         'GroupID',        'Name'),
+        ('GroupMembership',     'GroupID',        'MemberID'),
+        ('Post',                'PostID',         'PostID'),
+        ('Comment',             'CommentID',      'CommentID'),
+        ('PostLike',            'PostID',         'MemberID'),
+        ('Poll',                'PollID',         'Question'),
+        ('PollOption',          'OptionID',       'OptionText'),
+        ('PollVote',            'OptionID',       'MemberID'),
+        ('JobPost',             'JobID',          'Title'),
+        ('ReferralRequest',     'RequestID',      'StudentID'),
+        ('ProfileClaimQuestion','ClaimID',        'ClaimID'),
+        ('ProfileClaimVote',    'ClaimID',        'VoterID'),
+    ]
 
-    # Trigger: log direct UPDATE on Member table (detects unauthorized modifications)
-    cursor.execute("""
-        CREATE TRIGGER trg_member_update_audit
-        BEFORE UPDATE ON Member
-        FOR EACH ROW
-        BEGIN
-            INSERT INTO AuditLog (Timestamp, Username, Action, Endpoint, IPAddress, Details, IsAuthorized)
-            VALUES (
-                NOW(),
-                COALESCE(@app_username, 'DIRECT_DB_ACCESS'),
-                'UPDATE_MEMBER',
-                COALESCE(@app_endpoint, 'DIRECT_SQL'),
-                COALESCE(@app_ip, 'N/A'),
-                CONCAT('Member updated: ', OLD.Username, ' (ID: ', OLD.MemberID, ')'),
-                IF(@app_username IS NOT NULL, TRUE, FALSE)
-            );
-        END
-    """)
+    for table, pk, detail in trigger_tables:
+        for op in ['INSERT', 'UPDATE', 'DELETE']:
+            trig_name = f"trg_{table.lower()}_{op.lower()}_audit"
+            cursor.execute(f"DROP TRIGGER IF EXISTS {trig_name}")
+
+            if op == 'INSERT':
+                ref = 'NEW'
+                detail_expr = f"CONCAT('{table} inserted: ', NEW.{detail}, ' (PK: ', NEW.{pk}, ')')"
+            elif op == 'UPDATE':
+                ref = 'OLD'
+                detail_expr = f"CONCAT('{table} updated: ', OLD.{detail}, ' (PK: ', OLD.{pk}, ')')"
+            else:
+                ref = 'OLD'
+                detail_expr = f"CONCAT('{table} deleted: ', OLD.{detail}, ' (PK: ', OLD.{pk}, ')')"
+
+            timing = 'AFTER' if op == 'INSERT' else 'BEFORE'
+
+            cursor.execute(f"""
+                CREATE TRIGGER {trig_name}
+                {timing} {op} ON {table}
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO AuditLog (Timestamp, Username, Action, Endpoint, IPAddress, Details, IsAuthorized)
+                    VALUES (
+                        NOW(),
+                        COALESCE(@app_username, 'DIRECT_DB_ACCESS'),
+                        '{op}_{table.upper()}',
+                        COALESCE(@app_endpoint, 'DIRECT_SQL'),
+                        COALESCE(@app_ip, 'N/A'),
+                        {detail_expr},
+                        IF(@app_username IS NOT NULL, TRUE, FALSE)
+                    );
+                END
+            """)
 
     conn.commit()
-    print("Tables created.")
+    print("Tables and audit triggers created.")
 
     # --- Insert mock data ---
+    # Mark seed operations as authorized so triggers don't flag them
+    cursor.execute("SET @app_username = 'SEED_SCRIPT'")
+    cursor.execute("SET @app_endpoint = 'seed.py'")
+    cursor.execute("SET @app_ip = 'localhost'")
     pw = generate_password_hash('password123')
 
     members = [

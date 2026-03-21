@@ -2,9 +2,9 @@
   {
     "name": "Global Post Feed",
     "description": "Fetch all posts with author info, like/comment counts, ordered by date",
-    "time_before_ms": 0.3126,
-    "time_after_ms": 0.2413,
-    "speedup_pct": 22.81,
+    "time_before_ms": 0.3046,
+    "time_after_ms": 0.2109,
+    "speedup_pct": 30.75,
     "explain_before": [
       {
         "id": 1,
@@ -155,9 +155,9 @@
   {
     "name": "Group Posts",
     "description": "Posts for a specific group with counts, ordered by date",
-    "time_before_ms": 0.1628,
-    "time_after_ms": 0.1438,
-    "speedup_pct": 11.69,
+    "time_before_ms": 0.1379,
+    "time_after_ms": 0.1344,
+    "speedup_pct": 2.59,
     "explain_before": [
       {
         "id": 1,
@@ -280,9 +280,9 @@
   {
     "name": "Post Comments",
     "description": "All comments for a post with author details, ordered chronologically",
-    "time_before_ms": 0.1219,
-    "time_after_ms": 0.1144,
-    "speedup_pct": 6.17,
+    "time_before_ms": 0.1124,
+    "time_after_ms": 0.1111,
+    "speedup_pct": 1.16,
     "explain_before": [
       {
         "id": 1,
@@ -349,9 +349,9 @@
   {
     "name": "User Profile Posts",
     "description": "Recent posts by a member for profile page",
-    "time_before_ms": 0.1317,
-    "time_after_ms": 0.1286,
-    "speedup_pct": 2.39,
+    "time_before_ms": 0.1257,
+    "time_after_ms": 0.1248,
+    "speedup_pct": 0.71,
     "explain_before": [
       {
         "id": 1,
@@ -474,9 +474,9 @@
   {
     "name": "Class Attendance",
     "description": "Monthly class attendance with course info for a student",
-    "time_before_ms": 0.1668,
-    "time_after_ms": 0.1657,
-    "speedup_pct": 0.7,
+    "time_before_ms": 0.1623,
+    "time_after_ms": 0.1579,
+    "speedup_pct": 2.73,
     "explain_before": [
       {
         "id": 1,
@@ -543,9 +543,9 @@
   {
     "name": "Mess Attendance",
     "description": "Monthly mess attendance records for a student",
-    "time_before_ms": 0.2599,
-    "time_after_ms": 0.2671,
-    "speedup_pct": -2.76,
+    "time_before_ms": 0.2563,
+    "time_after_ms": 0.2545,
+    "speedup_pct": 0.72,
     "explain_before": [
       {
         "id": 1,
@@ -584,9 +584,9 @@
   {
     "name": "Job Listings",
     "description": "All job posts with alumni info, ordered by posting date",
-    "time_before_ms": 0.1694,
-    "time_after_ms": 0.1625,
-    "speedup_pct": 4.07,
+    "time_before_ms": 0.1508,
+    "time_after_ms": 0.1503,
+    "speedup_pct": 0.28,
     "explain_before": [
       {
         "id": 1,
@@ -681,9 +681,9 @@
   {
     "name": "Referral Requests (Alumni)",
     "description": "Referral requests received by an alumni, newest first",
-    "time_before_ms": 0.1214,
-    "time_after_ms": 0.1146,
-    "speedup_pct": 5.65,
+    "time_before_ms": 0.1048,
+    "time_after_ms": 0.105,
+    "speedup_pct": -0.23,
     "explain_before": [
       {
         "id": 1,
@@ -750,9 +750,9 @@
   {
     "name": "Polls with Options & Votes",
     "description": "All polls with vote counts per option",
-    "time_before_ms": 0.104,
-    "time_after_ms": 0.1018,
-    "speedup_pct": 2.11,
+    "time_before_ms": 0.0991,
+    "time_after_ms": 0.0987,
+    "speedup_pct": 0.37,
     "explain_before": [
       {
         "id": 1,
@@ -819,9 +819,9 @@
   {
     "name": "Member Search by Type",
     "description": "Filter members by type and order by name",
-    "time_before_ms": 0.1148,
-    "time_after_ms": 0.1109,
-    "speedup_pct": 3.41,
+    "time_before_ms": 0.1184,
+    "time_after_ms": 0.1172,
+    "speedup_pct": 0.98,
     "explain_before": [
       {
         "id": 1,
@@ -833,7 +833,7 @@
         "key": null,
         "key_len": null,
         "ref": null,
-        "rows": 11,
+        "rows": 12,
         "filtered": 25.0,
         "Extra": "Using where; Using filesort"
       }
@@ -849,12 +849,12 @@
         "key": null,
         "key_len": null,
         "ref": null,
-        "rows": 11,
+        "rows": 12,
         "filtered": 25.0,
         "Extra": "Using where; Using filesort"
       }
     ],
-    "explain_before_summary": "Member: type=ALL, key=None, rows=11, extra=Using where; Using filesort",
-    "explain_after_summary": "Member: type=ALL, key=None, rows=11, extra=Using where; Using filesort"
+    "explain_before_summary": "Member: type=ALL, key=None, rows=12, extra=Using where; Using filesort",
+    "explain_after_summary": "Member: type=ALL, key=None, rows=12, extra=Using where; Using filesort"
   }
 ]
