@@ -90,9 +90,9 @@ export default function Feed() {
     return items;
   })();
 
-  const handleNewPost = async (content) => {
+  const handleNewPost = async (content, imageUrl) => {
     try {
-      await postsApi.create(content);
+      await postsApi.create(content, null, imageUrl);
       refreshFeed();
     } catch (err) {
       console.error('Failed to create post:', err);

@@ -39,10 +39,24 @@ export const authApi = {
   verifyOtp: (email, otp) => api('/auth/verify-otp', { method: 'POST', body: { email, otp } }),
 };
 
+// Upload
+export async function uploadFile(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(`${API_BASE}/upload`, {
+    method: 'POST',
+    headers: { ...authHeaders() },
+    body: formData,
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(data?.error || 'Upload failed');
+  return data;
+}
+
 // Posts
 export const postsApi = {
   getFeed: (feed = 'global') => api(`/posts?feed=${feed}`),
-  create: (content, groupId) => api('/posts', { method: 'POST', body: { content, groupId } }),
+  create: (content, groupId, imageUrl) => api('/posts', { method: 'POST', body: { content, groupId, imageUrl } }),
   update: (id, content) => api(`/posts/${id}`, { method: 'PUT', body: { content } }),
   delete: (id) => api(`/posts/${id}`, { method: 'DELETE' }),
   getComments: (postId) => api(`/posts/${postId}/comments`),

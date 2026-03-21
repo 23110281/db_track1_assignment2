@@ -72,13 +72,14 @@ def create_post():
     data = request.get_json()
     content = data.get('content', '').strip()
     group_id = data.get('groupId')
+    image_url = data.get('imageUrl')
 
-    if not content:
-        return jsonify(error='Content is required'), 400
+    if not content and not image_url:
+        return jsonify(error='Content or image is required'), 400
 
     post_id = execute_db(
-        "INSERT INTO Post (AuthorID, GroupID, Content, CreatedAt) VALUES (%s,%s,%s, NOW())",
-        (user_id, group_id, content),
+        "INSERT INTO Post (AuthorID, GroupID, Content, ImageURL, CreatedAt) VALUES (%s,%s,%s,%s, NOW())",
+        (user_id, group_id, content, image_url),
     )
     log_action('CREATE_POST', f"Created post {post_id} in group {group_id}", user=get_current_username())
     return jsonify(postId=post_id), 201

@@ -16,9 +16,16 @@ from routes.members import members_bp
 from routes.admin import admin_bp
 from routes.settings import settings_bp
 
+import os
+
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = config.JWT_SECRET_KEY
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(seconds=config.JWT_ACCESS_TOKEN_EXPIRES)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10 MB max
 
 CORS(app, origins=['http://localhost:5173', 'http://127.0.0.1:5173'])
 JWTManager(app)
@@ -58,6 +65,31 @@ def audit_log_request(response):
         )
     return response
 
+
+from flask import send_from_directory
+from flask_jwt_extended import jwt_required as _jr, get_jwt_identity
+import uuid
+
+@app.route('/api/upload', methods=['POST'])
+@_jr()
+def upload_file():
+    if 'file' not in flask_request.files:
+        return {'error': 'No file provided'}, 400
+    f = flask_request.files['file']
+    if not f.filename:
+        return {'error': 'No file selected'}, 400
+    allowed = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    ext = f.filename.rsplit('.', 1)[-1].lower() if '.' in f.filename else ''
+    if ext not in allowed:
+        return {'error': f'File type .{ext} not allowed'}, 400
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    f.save(os.path.join(UPLOAD_FOLDER, filename))
+    url = f"http://localhost:5001/uploads/{filename}"
+    return {'url': url}, 201
+
+@app.route('/uploads/<path:filename>')
+def serve_upload(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 @app.route('/')
 def welcome():
