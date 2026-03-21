@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Send, Image } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Send, Image, X } from 'lucide-react';
+import { uploadFile } from '../api';
 
 const styles = {
   card: {
@@ -81,6 +82,40 @@ const styles = {
     background: '#a5b4fc',
     cursor: 'not-allowed',
   },
+  previewContainer: {
+    position: 'relative',
+    display: 'inline-block',
+    marginTop: 4,
+  },
+  previewImg: {
+    maxWidth: '100%',
+    maxHeight: 200,
+    borderRadius: 10,
+    objectFit: 'cover',
+    border: '1.5px solid #e5e7eb',
+  },
+  removeBtn: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 24,
+    height: 24,
+    borderRadius: '50%',
+    background: 'rgba(0,0,0,0.6)',
+    color: '#fff',
+    border: 'none',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 0,
+  },
+  uploadingBar: {
+    height: 3,
+    background: '#4F46E5',
+    borderRadius: 2,
+    animation: 'pulse 1s ease-in-out infinite',
+  },
 };
 
 function getInitials(name) {
@@ -93,11 +128,47 @@ function getInitials(name) {
 export default function CreatePost({ user, onPost }) {
   const [content, setContent] = useState('');
   const [focused, setFocused] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
-  const handlePost = () => {
-    if (!content.trim()) return;
-    onPost(content.trim());
-    setContent('');
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setImagePreview(ev.target.result);
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handlePost = async () => {
+    if (!content.trim() && !imageFile) return;
+    setUploading(true);
+    try {
+      let imageUrl = null;
+      if (imageFile) {
+        const uploadResult = await uploadFile(imageFile);
+        imageUrl = uploadResult.url;
+      }
+      await onPost(content.trim(), imageUrl);
+      setContent('');
+      removeImage();
+    } catch (err) {
+      console.error('Post failed:', err);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -106,7 +177,7 @@ export default function CreatePost({ user, onPost }) {
     }
   };
 
-  const isEmpty = !content.trim();
+  const isEmpty = !content.trim() && !imageFile;
 
   return (
     <div style={styles.card}>
@@ -127,31 +198,52 @@ export default function CreatePost({ user, onPost }) {
             onBlur={() => setFocused(false)}
             onKeyDown={handleKeyDown}
           />
+          {imagePreview && (
+            <div style={styles.previewContainer}>
+              <img src={imagePreview} alt="Preview" style={styles.previewImg} />
+              <button style={styles.removeBtn} onClick={removeImage} title="Remove photo">
+                <X size={14} />
+              </button>
+            </div>
+          )}
+          {uploading && (
+            <div style={{ height: 3, background: '#e5e7eb', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={styles.uploadingBar} />
+            </div>
+          )}
           <div style={styles.bottomRow}>
             <button
               style={styles.attachBtn}
+              onClick={handlePhotoClick}
               onMouseEnter={e => { e.currentTarget.style.background = '#f9fafb'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
             >
               <Image size={18} />
               Photo
             </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/gif,image/webp"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
             <button
               onClick={handlePost}
-              disabled={isEmpty}
+              disabled={isEmpty || uploading}
               style={{
                 ...styles.postBtn,
-                ...(isEmpty ? styles.postBtnDisabled : {}),
+                ...((isEmpty || uploading) ? styles.postBtnDisabled : {}),
               }}
               onMouseEnter={e => {
-                if (!isEmpty) e.currentTarget.style.background = '#4338CA';
+                if (!isEmpty && !uploading) e.currentTarget.style.background = '#4338CA';
               }}
               onMouseLeave={e => {
-                if (!isEmpty) e.currentTarget.style.background = '#4F46E5';
+                if (!isEmpty && !uploading) e.currentTarget.style.background = '#4F46E5';
               }}
             >
               <Send size={16} />
-              Post
+              {uploading ? 'Posting...' : 'Post'}
             </button>
           </div>
         </div>

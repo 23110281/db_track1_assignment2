@@ -353,7 +353,17 @@ export default function PostCard({ post }) {
         </div>
       )}
 
-      <div style={styles.content}>{post.Content}</div>
+      {post.Content && <div style={styles.content}>{post.Content}</div>}
+
+      {post.ImageURL && (
+        <div style={{ marginBottom: 12 }}>
+          <img
+            src={post.ImageURL}
+            alt="Post"
+            style={{ width: '100%', maxHeight: 400, objectFit: 'cover', borderRadius: 10, border: '1px solid #e5e7eb' }}
+          />
+        </div>
+      )}
 
       <div style={styles.actions}>
         <button

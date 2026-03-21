@@ -205,9 +205,9 @@ export default function GroupDetail() {
     );
   }
 
-  const handleNewPost = async (content) => {
+  const handleNewPost = async (content, imageUrl) => {
     try {
-      await postsApi.create(content, gid);
+      await postsApi.create(content, gid, imageUrl);
       await fetchPosts();
     } catch (err) {
       console.error('Failed to create post:', err);
