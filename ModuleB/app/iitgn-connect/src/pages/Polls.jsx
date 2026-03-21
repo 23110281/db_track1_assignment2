@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { BarChart3, Clock, Plus, CheckCircle2, User, X } from 'lucide-react';
+import { BarChart3, Clock, Plus, CheckCircle2, User, X, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { pollsApi } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -25,16 +25,16 @@ const s = {
   question: { fontSize: 18, fontWeight: 700, color: '#1E1B4B', margin: '0 0 4px' },
   meta: { display: 'flex', alignItems: 'center', gap: 14, fontSize: 13, color: '#9CA3AF', marginBottom: 16, flexWrap: 'wrap' },
   metaItem: { display: 'flex', alignItems: 'center', gap: 4 },
-  optionRow: {
+  optionRow: (active) => ({
     display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
-    borderRadius: 8, marginBottom: 8, cursor: 'pointer',
+    borderRadius: 8, marginBottom: 8, cursor: active ? 'pointer' : 'default',
     border: '2px solid #E5E7EB', transition: 'all 0.2s',
-  },
-  optionRowVoted: {
+  }),
+  optionRowVoted: (active) => ({
     display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
-    borderRadius: 8, marginBottom: 8, cursor: 'default',
+    borderRadius: 8, marginBottom: 8, cursor: active ? 'pointer' : 'default',
     border: `2px solid ${PRIMARY}`, background: '#EEF2FF',
-  },
+  }),
   optionText: { flex: 1, fontSize: 14, fontWeight: 500, color: '#1E1B4B' },
   optionVotes: { fontSize: 13, fontWeight: 700, color: PRIMARY, minWidth: 40, textAlign: 'right' },
   barBg: { flex: 2, height: 8, background: '#E5E7EB', borderRadius: 99, overflow: 'hidden' },
@@ -81,6 +81,12 @@ export default function Polls() {
   const [showForm, setShowForm] = useState(false);
   const [newQuestion, setNewQuestion] = useState('');
   const [newOptions, setNewOptions] = useState(['', '']);
+  const [menuOpenId, setMenuOpenId] = useState(null);
+  const [editingPollId, setEditingPollId] = useState(null);
+  const [editQuestion, setEditQuestion] = useState('');
+  const [editOptions, setEditOptions] = useState([]);
+
+  const isAdmin = user?.isAdmin;
 
   const fetchPolls = useCallback(async () => {
     try {
@@ -106,9 +112,13 @@ export default function Polls() {
 
   const handleVote = async (pollId, optionId) => {
     const poll = pollList.find(p => p.PollID === pollId);
-    if (poll?.userVotedOptionId) return;
     try {
-      await pollsApi.vote(pollId, optionId);
+      if (poll?.userVotedOptionId === optionId) {
+        // Clicking already-voted option → unvote
+        await pollsApi.unvote(pollId);
+      } else {
+        await pollsApi.vote(pollId, optionId);
+      }
       await fetchPolls();
     } catch (err) { console.error('Failed to vote:', err); }
   };
@@ -129,21 +139,141 @@ export default function Polls() {
     } catch (err) { console.error('Failed to create poll:', err); }
   };
 
+  const handleDeletePoll = async (pollId) => {
+    try {
+      await pollsApi.delete(pollId);
+      setMenuOpenId(null);
+      await fetchPolls();
+    } catch (err) { console.error('Failed to delete poll:', err); }
+  };
+
+  const startEditPoll = (poll) => {
+    setEditingPollId(poll.PollID);
+    setEditQuestion(poll.Question);
+    setEditOptions((poll.options || []).map(o => o.OptionText));
+    setMenuOpenId(null);
+  };
+
+  const handleSaveEdit = async (pollId) => {
+    const filteredOpts = editOptions.filter(o => o.trim());
+    if (!editQuestion.trim() || filteredOpts.length < 2) return;
+    try {
+      await pollsApi.update(pollId, { question: editQuestion.trim(), options: filteredOpts });
+      setEditingPollId(null);
+      await fetchPolls();
+    } catch (err) { console.error('Failed to update poll:', err); }
+  };
+
   const renderPoll = (poll) => {
     const pollOpts = poll.options || [];
     const totalVotes = pollOpts.reduce((sum, o) => sum + o.votes, 0);
     const active = isActive(poll);
     const userVote = poll.userVotedOptionId;
+    const isOwnPoll = poll.CreatorID === user?.MemberID;
+    const canManage = isOwnPoll || isAdmin;
+
+    if (editingPollId === poll.PollID) {
+      return (
+        <div key={poll.PollID} style={{ ...s.card, border: `2px solid ${PRIMARY}` }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: PRIMARY, marginBottom: 12 }}>Edit Poll</div>
+          <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>Question</label>
+          <input
+            style={s.input}
+            value={editQuestion}
+            onChange={e => setEditQuestion(e.target.value)}
+          />
+          <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>Options</label>
+          {editOptions.map((opt, i) => (
+            <div key={i} style={s.optionInputRow}>
+              <input
+                style={{ ...s.input, marginBottom: 0, flex: 1 }}
+                placeholder={`Option ${i + 1}`}
+                value={opt}
+                onChange={e => {
+                  const copy = [...editOptions];
+                  copy[i] = e.target.value;
+                  setEditOptions(copy);
+                }}
+              />
+              {editOptions.length > 2 && (
+                <button style={s.removeBtn} onClick={() => setEditOptions(prev => prev.filter((_, j) => j !== i))}>
+                  <X size={16} color="#9CA3AF" />
+                </button>
+              )}
+            </div>
+          ))}
+          <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+            <button style={s.btnSmall} onClick={() => setEditOptions(prev => [...prev, ''])}>+ Add Option</button>
+            <button onClick={() => handleSaveEdit(poll.PollID)} style={s.btnSubmit}>Save Changes</button>
+            <button onClick={() => setEditingPollId(null)} style={s.btnSmall}>Cancel</button>
+          </div>
+          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>Note: Editing options will reset all existing votes.</div>
+        </div>
+      );
+    }
 
     return (
       <div key={poll.PollID} style={s.card}>
-        <h3 style={s.question}>{poll.Question}</h3>
-        <div style={s.meta}>
-          <span style={s.metaItem}><User size={13} /> {poll.CreatorName || 'Unknown'}</span>
-          <span style={s.timeTag(active)}>
-            <Clock size={12} />
-            {active ? getTimeRemaining(poll.ExpiresAt) : 'Expired'}
-          </span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div style={{ flex: 1 }}>
+            <h3 style={s.question}>{poll.Question}</h3>
+            <div style={s.meta}>
+              <span style={s.metaItem}><User size={13} /> {poll.CreatorName || 'Unknown'}</span>
+              <span style={s.timeTag(active)}>
+                <Clock size={12} />
+                {active ? getTimeRemaining(poll.ExpiresAt) : 'Expired'}
+              </span>
+            </div>
+          </div>
+          {canManage && (
+            <div style={{ position: 'relative', flexShrink: 0, marginLeft: 12 }}>
+              <button
+                onClick={() => setMenuOpenId(menuOpenId === poll.PollID ? null : poll.PollID)}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: 32, height: 32, borderRadius: 8, border: 'none',
+                  background: menuOpenId === poll.PollID ? '#F3F4F6' : 'transparent',
+                  color: '#6b7280', cursor: 'pointer',
+                }}
+              >
+                <MoreVertical size={16} />
+              </button>
+              {menuOpenId === poll.PollID && (
+                <div style={{
+                  position: 'absolute', right: 0, top: 36, zIndex: 10,
+                  background: '#fff', borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                  border: '1px solid #e5e7eb', overflow: 'hidden', minWidth: 140,
+                }}>
+                  {isOwnPoll && (
+                    <button
+                      onClick={() => startEditPoll(poll)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                        padding: '10px 14px', border: 'none', background: '#fff',
+                        fontSize: 13, fontWeight: 500, color: '#374151', cursor: 'pointer', textAlign: 'left',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = '#F9FAFB'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
+                    >
+                      <Pencil size={14} /> Edit
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDeletePoll(poll.PollID)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                      padding: '10px 14px', border: 'none', background: '#fff',
+                      fontSize: 13, fontWeight: 500, color: '#EF4444', cursor: 'pointer', textAlign: 'left',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#FEF2F2'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
+                  >
+                    <Trash2 size={14} /> Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         {pollOpts.map(opt => {
           const pct = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
@@ -151,7 +281,7 @@ export default function Polls() {
           return (
             <div
               key={opt.OptionID}
-              style={isVoted ? s.optionRowVoted : s.optionRow}
+              style={isVoted ? s.optionRowVoted(active) : s.optionRow(active)}
               onClick={() => active && handleVote(poll.PollID, opt.OptionID)}
             >
               {isVoted && <CheckCircle2 size={16} color={PRIMARY} />}

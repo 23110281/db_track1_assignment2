@@ -120,7 +120,7 @@ def get_streaks():
 @attendance_bp.route('/leaderboard', methods=['GET'])
 @jwt_required()
 def get_leaderboard():
-    students = query_db("SELECT MemberID FROM Student")
+    students = query_db("SELECT s.MemberID FROM Student s JOIN Member m ON s.MemberID = m.MemberID WHERE m.IsAdmin = FALSE")
 
     leaderboard = []
     for s in students:

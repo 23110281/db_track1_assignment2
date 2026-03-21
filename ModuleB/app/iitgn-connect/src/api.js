@@ -100,7 +100,10 @@ export const jobsApi = {
 export const pollsApi = {
   getAll: () => api('/polls/'),
   create: (data) => api('/polls/', { method: 'POST', body: data }),
+  update: (pollId, data) => api(`/polls/${pollId}`, { method: 'PUT', body: data }),
+  delete: (pollId) => api(`/polls/${pollId}`, { method: 'DELETE' }),
   vote: (pollId, optionId) => api(`/polls/${pollId}/vote`, { method: 'POST', body: { optionId } }),
+  unvote: (pollId) => api(`/polls/${pollId}/unvote`, { method: 'POST' }),
 };
 
 // Attendance
@@ -143,4 +146,6 @@ export const settingsApi = {
   changePassword: (data) => api('/settings/password', { method: 'PUT', body: data }),
   changeUsername: (data) => api('/settings/change-username', { method: 'PUT', body: data }),
   deleteAccount: () => api('/settings/account', { method: 'DELETE' }),
+  getPrivacy: () => api('/settings/privacy'),
+  updatePrivacy: (data) => api('/settings/privacy', { method: 'PUT', body: data }),
 };

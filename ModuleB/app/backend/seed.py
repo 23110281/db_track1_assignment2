@@ -448,39 +448,64 @@ def run():
         courses,
     )
 
+    # All student IDs: 1 (Laksh), 2 (Parthiv), 3 (Ridham), 4 (Shriniket), 5 (Rudra), 11 (Admin/Student)
+    all_student_ids = [1, 2, 3, 4, 5, 11]
+
+    # Enroll every student in 2-3 courses
     enrollments = [
+        # Student 1 (Laksh) — CS432, CS301
         (1, 1, '2026-01-10', 'Spring 2026', 'Active'),
         (1, 2, '2026-01-10', 'Spring 2026', 'Active'),
+        # Student 2 (Parthiv) — CS432, Data Structures
         (2, 1, '2026-01-10', 'Spring 2026', 'Active'),
         (2, 3, '2026-01-10', 'Spring 2026', 'Active'),
+        # Student 3 (Ridham) — CS301, Linear Algebra
         (3, 2, '2026-01-10', 'Spring 2026', 'Active'),
         (3, 4, '2026-01-10', 'Spring 2026', 'Active'),
+        # Student 4 (Shriniket) — CS432, CS301, Data Structures
+        (4, 1, '2026-01-10', 'Spring 2026', 'Active'),
+        (4, 2, '2026-01-10', 'Spring 2026', 'Active'),
+        (4, 3, '2026-01-10', 'Spring 2026', 'Active'),
+        # Student 5 (Rudra) — CS432, Linear Algebra
+        (5, 1, '2026-01-10', 'Spring 2026', 'Active'),
+        (5, 4, '2026-01-10', 'Spring 2026', 'Active'),
+        # Student 11 (Admin) — CS432, CS301
+        (11, 1, '2026-01-10', 'Spring 2026', 'Active'),
+        (11, 2, '2026-01-10', 'Spring 2026', 'Active'),
     ]
     cursor.executemany(
         "INSERT INTO Enrollment (StudentID, CourseID, EnrollmentDate, Semester, Status) VALUES (%s,%s,%s,%s,%s)",
         enrollments,
     )
 
-    # Generate class attendance (deterministic with seed)
+    # Build enrollment map: student -> list of enrolled courseIDs
+    enrollment_map = {}
+    for sid, cid, *_ in enrollments:
+        enrollment_map.setdefault(sid, []).append(cid)
+
+    # Generate class attendance for ALL students (March 1-20, 2026)
+    # Each student gets attendance only for courses they are enrolled in
     statuses = ['Present', 'Present', 'Present', 'Present', 'Absent']
     class_att = []
     att_id = 1
-    for sid in range(1, 6):
+    for sid in all_student_ids:
+        enrolled_courses = enrollment_map.get(sid, [])
         for day in range(1, 21):
             date = f"2026-03-{day:02d}"
-            class_att.append((att_id, (sid % 4) + 1, sid, date, random.choice(statuses)))
-            att_id += 1
+            for cid in enrolled_courses:
+                class_att.append((att_id, cid, sid, date, random.choice(statuses)))
+                att_id += 1
     cursor.executemany(
         "INSERT INTO ClassAttendance (AttendanceID, CourseID, StudentID, RecordDate, Status) VALUES (%s,%s,%s,%s,%s)",
         class_att,
     )
 
-    # Generate mess attendance
+    # Generate mess attendance for ALL students (March 1-20, 2026)
     meals = ['Breakfast', 'Lunch', 'Dinner']
     mess_statuses = ['Eaten', 'Eaten', 'Eaten', 'Missed']
     mess_att = []
     mess_id = 1
-    for sid in range(1, 6):
+    for sid in all_student_ids:
         for day in range(1, 21):
             date = f"2026-03-{day:02d}"
             for meal in meals:
