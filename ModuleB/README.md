@@ -57,7 +57,7 @@ Databases Ass2/
 │   │   │   ├── attendance.py # Class & mess attendance
 │   │   │   ├── profile.py  # User profiles, claims
 │   │   │   ├── members.py  # Member search
-│   │   │   ├── admin.py    # Admin dashboard (RBAC protected)
+│   │   │   ├── admin.py    # Admin dashboard + SQL console (RBAC protected)
 │   │   │   └── settings.py # Profile settings, password, username
 │   │   ├── uploads/        # User-uploaded images
 │   │   └── benchmarks/     # Generated benchmark charts
@@ -219,18 +219,31 @@ You can also log in with email instead of username (e.g., `laksh.jain@iitgn.ac.i
 - **Global Feed** — Posts with likes, comments, image uploads, inline edit/delete
 - **User Profiles** — Member portfolio with posts, groups, profile claims with community voting
 - **Settings** — Update profile, change password, change username (OTP verified)
+- **Global Search** — Navbar search bar searches members across the platform (redirects to Member Directory with query)
 
 ### Social
-- **Groups** — Create public/restricted groups, admin approval for restricted groups, member management (kick, make admin)
+- **Groups** — Create public/restricted groups, admin approval for restricted groups, member management (kick, make admin), group-specific post feeds with clickable group badges
 - **Polls** — Create polls with multiple options, real-time vote counts
-- **Job Board** — Alumni post job listings, students send referral requests
+- **Job Board** — Alumni post job listings, students send referral requests with live status tracking ("Referral Sent!" feedback)
 
 ### Academic
-- **Attendance Tracking** — Class and mess attendance records, monthly breakdowns, streaks, leaderboard
+- **Attendance Tracking** — Class and mess attendance records, monthly calendar view, course-wise breakdowns, meal-wise stats, streaks, and leaderboard
 
 ### Admin
-- **Admin Dashboard** — System statistics, manage all members and groups
-- **RBAC** — Admin-only endpoints protected by `admin_required` decorator
+- **Admin Dashboard** — System statistics, manage all members (edit roles, delete) and groups, "Admin" badge for admin users, self-delete protection
+- **SQL Query Console** — Terminal-themed dark UI for admins to run raw SQL queries directly from the browser
+- **Full Content Moderation** — Admin can delete any post, comment, or job posting across the platform
+
+### Role-Based UI Visibility
+Different member types see different features in the sidebar and pages:
+
+| Feature             | Student | Alumni | Professor | Organization | Admin |
+|---------------------|---------|--------|-----------|--------------|-------|
+| Jobs & Referrals    | View + Request Referral | View + Post Jobs | Hidden | Hidden | View + Delete Jobs |
+| My Referrals Tab    | Yes     | Referral Requests | N/A | N/A | Hidden |
+| Attendance Streaks  | Full    | Hidden | Hidden | Full | Leaderboard Only |
+| Admin Dashboard     | Hidden  | Hidden | Hidden | Hidden | Full Access |
+| SQL Console         | Hidden  | Hidden | Hidden | Hidden | Full Access |
 
 ### Security
 - **JWT Authentication** — 24-hour token expiry, `@jwt_required()` on all protected routes
@@ -281,6 +294,8 @@ View the full optimization report in `report.ipynb` (Jupyter Notebook).
 | POST   | `/api/posts/:id/like`            | Toggle like                    | JWT      |
 | GET    | `/api/posts/:id/comments`        | Get comments                   | JWT      |
 | POST   | `/api/posts/:id/comments`        | Add comment                    | JWT      |
+| PUT    | `/api/comments/:id`              | Edit comment (author only)     | JWT      |
+| DELETE | `/api/comments/:id`              | Delete comment (author/admin)  | JWT      |
 | GET    | `/api/groups/`                   | List all groups                | JWT      |
 | POST   | `/api/groups/`                   | Create group                   | JWT      |
 | PUT    | `/api/groups/:id`                | Update group (admin only)      | JWT      |
@@ -293,13 +308,23 @@ View the full optimization report in `report.ipynb` (Jupyter Notebook).
 | POST   | `/api/groups/:id/kick/:mid`      | Kick member (group admin)      | JWT      |
 | GET    | `/api/jobs`                      | List job postings              | JWT      |
 | POST   | `/api/jobs`                      | Post job (alumni only)         | JWT      |
+| PUT    | `/api/jobs/:id`                  | Update job (author only)       | JWT      |
+| DELETE | `/api/jobs/:id`                  | Delete job (author/admin)      | JWT      |
+| GET    | `/api/referrals`                 | Get referral requests          | JWT      |
+| POST   | `/api/referrals`                 | Create referral request        | JWT      |
+| PUT    | `/api/referrals/:id`             | Update referral status         | JWT      |
 | GET    | `/api/polls/`                    | List polls                     | JWT      |
 | POST   | `/api/polls/`                    | Create poll                    | JWT      |
 | POST   | `/api/polls/:id/vote`            | Vote on poll                   | JWT      |
 | GET    | `/api/attendance/class`          | Class attendance records       | JWT      |
 | GET    | `/api/attendance/mess`           | Mess attendance records        | JWT      |
 | GET    | `/api/attendance/streaks`        | Attendance streaks             | JWT      |
+| GET    | `/api/attendance/leaderboard`    | Streak leaderboard             | JWT      |
 | GET    | `/api/profile/:id`               | Get user profile               | JWT      |
+| POST   | `/api/claims`                    | Create profile claim           | JWT      |
+| PUT    | `/api/claims/:id`                | Edit profile claim             | JWT      |
+| DELETE | `/api/claims/:id`                | Delete profile claim           | JWT      |
+| POST   | `/api/claims/:id/vote`           | Vote on claim                  | JWT      |
 | GET    | `/api/members/`                  | Search/filter members          | JWT      |
 | PUT    | `/api/settings/profile`          | Update profile                 | JWT      |
 | PUT    | `/api/settings/password`         | Change password                | JWT      |
@@ -307,8 +332,10 @@ View the full optimization report in `report.ipynb` (Jupyter Notebook).
 | DELETE | `/api/settings/account`          | Delete account                 | JWT      |
 | GET    | `/api/admin/stats`               | System statistics              | Admin    |
 | GET    | `/api/admin/members`             | List all members               | Admin    |
+| PUT    | `/api/admin/members/:id`         | Update member role             | Admin    |
 | DELETE | `/api/admin/members/:id`         | Delete member                  | Admin    |
 | DELETE | `/api/admin/groups/:id`          | Delete group                   | Admin    |
+| POST   | `/api/admin/query`               | Execute SQL query              | Admin    |
 
 ---
 
