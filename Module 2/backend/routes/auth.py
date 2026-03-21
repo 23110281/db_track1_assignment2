@@ -69,6 +69,14 @@ def register():
     if not all([username, name, email, password, member_type]):
         return jsonify(error='All fields are required'), 400
 
+    if not email.endswith('@iitgn.ac.in'):
+        return jsonify(error='Only @iitgn.ac.in email addresses are allowed'), 400
+
+    # Check OTP verification (in-memory)
+    from email_service import is_email_verified
+    if not is_email_verified(email):
+        return jsonify(error='Email not verified. Please verify your email first.'), 400
+
     existing = query_db("SELECT MemberID FROM Member WHERE Username = %s OR Email = %s", (username, email), one=True)
     if existing:
         return jsonify(error='Username or email already exists'), 409
@@ -101,8 +109,57 @@ def register():
             (member_id, data.get('orgType', ''), email),
         )
 
+    # Clean up OTP record from memory after successful registration
+    from email_service import clear_otp
+    clear_otp(email)
+
     log_action('REGISTER', f"New {member_type} registered: '{username}' (ID: {member_id})", user=username)
     return jsonify(message='Registration successful', memberId=member_id), 201
+
+
+@auth_bp.route('/send-otp', methods=['POST'])
+def send_otp():
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+
+    if not email:
+        return jsonify(error='Email is required'), 400
+
+    if not email.endswith('@iitgn.ac.in'):
+        return jsonify(error='Only @iitgn.ac.in email addresses are allowed'), 400
+
+    # Check if email already registered
+    existing = query_db("SELECT MemberID FROM Member WHERE Email = %s", (email,), one=True)
+    if existing:
+        return jsonify(error='This email is already registered'), 409
+
+    from email_service import create_otp
+    success, message = create_otp(email)
+
+    if success:
+        log_action('SEND_OTP', f"OTP sent to {email}", user='anonymous')
+        return jsonify(message=message), 200
+    else:
+        return jsonify(error=message), 400
+
+
+@auth_bp.route('/verify-otp', methods=['POST'])
+def verify_otp_endpoint():
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    otp = data.get('otp', '').strip()
+
+    if not email or not otp:
+        return jsonify(error='Email and OTP are required'), 400
+
+    from email_service import verify_otp
+    success, message = verify_otp(email, otp)
+
+    if success:
+        log_action('VERIFY_OTP', f"Email {email} verified successfully", user='anonymous')
+        return jsonify(message=message, verified=True), 200
+    else:
+        return jsonify(error=message, verified=False), 400
 
 
 @auth_bp.route('/isAuth', methods=['GET'])

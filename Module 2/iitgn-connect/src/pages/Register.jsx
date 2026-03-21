@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   UserPlus,
@@ -8,6 +8,7 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronDown,
+  Shield,
 } from 'lucide-react';
 import { authApi } from '../api';
 
@@ -312,10 +313,65 @@ export default function Register() {
   const [showToast, setShowToast] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
 
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [otpCountdown, setOtpCountdown] = useState(0);
+
+  useEffect(() => {
+    if (otpCountdown > 0) {
+      const timer = setTimeout(() => setOtpCountdown(prev => prev - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [otpCountdown]);
+
+  const handleSendOtp = async () => {
+    const email = form.email.trim().toLowerCase();
+    if (!email) { setOtpError('Email is required'); return; }
+    if (!email.endsWith('@iitgn.ac.in')) { setOtpError('Only @iitgn.ac.in emails are allowed'); return; }
+
+    setOtpLoading(true);
+    setOtpError('');
+    try {
+      await authApi.sendOtp(email);
+      setOtpSent(true);
+      setOtpCountdown(60);
+      setOtpError('');
+    } catch (err) {
+      setOtpError(err.message || 'Failed to send OTP');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpCode.trim()) { setOtpError('Please enter the OTP'); return; }
+
+    setOtpLoading(true);
+    setOtpError('');
+    try {
+      await authApi.verifyOtp(form.email.trim().toLowerCase(), otpCode.trim());
+      setEmailVerified(true);
+      setOtpError('');
+    } catch (err) {
+      setOtpError(err.message || 'Invalid OTP');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     if (error) setError('');
+    if (name === 'email') {
+      setEmailVerified(false);
+      setOtpSent(false);
+      setOtpCode('');
+      setOtpError('');
+    }
   };
 
   const inputStyle = (field) => ({
@@ -331,6 +387,7 @@ export default function Register() {
     if (!form.email.trim()) return 'Email is required.';
     if (!form.email.trim().endsWith('@iitgn.ac.in'))
       return 'Email must be an @iitgn.ac.in address.';
+    if (!emailVerified) return 'Please verify your email first.';
     if (form.password.length < 6) return 'Password must be at least 6 characters.';
     if (form.password !== form.confirmPassword) return 'Passwords do not match.';
     if (!form.memberType) return 'Please select a member type.';
@@ -603,20 +660,145 @@ export default function Register() {
             </div>
           </div>
 
-          {/* Email */}
+          {/* Email with OTP Verification */}
           <div style={styles.inputGroup}>
             <label style={styles.label}>Email</label>
-            <input
-              type="email"
-              name="email"
-              placeholder="yourname@iitgn.ac.in"
-              value={form.email}
-              onChange={handleChange}
-              onFocus={() => setFocusedField('email')}
-              onBlur={() => setFocusedField(null)}
-              style={inputStyle('email')}
-              autoComplete="email"
-            />
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <div style={{ flex: 1, position: 'relative' }}>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="yourname@iitgn.ac.in"
+                  value={form.email}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={() => setFocusedField(null)}
+                  style={{
+                    ...inputStyle('email'),
+                    ...(emailVerified ? { borderColor: '#16a34a', boxShadow: '0 0 0 3px rgba(22, 163, 74, 0.15)' } : {}),
+                  }}
+                  autoComplete="email"
+                  disabled={emailVerified}
+                />
+                {emailVerified && (
+                  <span style={{
+                    position: 'absolute',
+                    right: '0.6rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}>
+                    <CheckCircle2 size={18} color="#16a34a" />
+                  </span>
+                )}
+              </div>
+              {!emailVerified && (
+                <button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={otpLoading || otpCountdown > 0}
+                  style={{
+                    padding: '0.55rem 1rem',
+                    background: (otpLoading || otpCountdown > 0)
+                      ? '#94a3b8'
+                      : 'linear-gradient(135deg, #4F46E5, #6366f1)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '2rem',
+                    fontSize: '0.78rem',
+                    fontWeight: '600',
+                    cursor: (otpLoading || otpCountdown > 0) ? 'not-allowed' : 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'opacity 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                  }}
+                >
+                  <Shield size={14} />
+                  {otpLoading ? 'Sending...' : otpCountdown > 0 ? `Resend in ${otpCountdown}s` : otpSent ? 'Resend OTP' : 'Send OTP'}
+                </button>
+              )}
+            </div>
+
+            {emailVerified && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                marginTop: '0.35rem',
+                padding: '0.3rem 0.7rem',
+                background: '#f0fdf4',
+                borderRadius: '2rem',
+                width: 'fit-content',
+                border: '1px solid #bbf7d0',
+              }}>
+                <CheckCircle2 size={14} color="#16a34a" />
+                <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#15803d' }}>Verified</span>
+              </div>
+            )}
+
+            {otpSent && !emailVerified && (
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.5rem' }}>
+                <input
+                  type="text"
+                  placeholder="Enter 6-digit OTP"
+                  value={otpCode}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                    setOtpCode(val);
+                  }}
+                  style={{
+                    ...styles.input,
+                    ...(focusedField === 'otp' ? styles.inputFocus : {}),
+                    flex: 1,
+                    textAlign: 'center',
+                    letterSpacing: '0.5rem',
+                    fontSize: '1.1rem',
+                    fontWeight: '600',
+                  }}
+                  onFocus={() => setFocusedField('otp')}
+                  onBlur={() => setFocusedField(null)}
+                  maxLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={handleVerifyOtp}
+                  disabled={otpLoading}
+                  style={{
+                    padding: '0.55rem 1rem',
+                    background: otpLoading
+                      ? '#94a3b8'
+                      : 'linear-gradient(135deg, #4F46E5, #6366f1)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '2rem',
+                    fontSize: '0.78rem',
+                    fontWeight: '600',
+                    cursor: otpLoading ? 'not-allowed' : 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'opacity 0.2s',
+                  }}
+                >
+                  {otpLoading ? 'Verifying...' : 'Verify'}
+                </button>
+              </div>
+            )}
+
+            {otpError && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                marginTop: '0.35rem',
+                color: '#dc2626',
+                fontSize: '0.8rem',
+              }}>
+                <AlertCircle size={14} />
+                <span>{otpError}</span>
+              </div>
+            )}
           </div>
 
           {/* Password */}
@@ -682,9 +864,9 @@ export default function Register() {
             type="submit"
             style={{
               ...styles.submitBtn,
-              ...(loading ? styles.submitBtnDisabled : {}),
+              ...((loading || !emailVerified) ? styles.submitBtnDisabled : {}),
             }}
-            disabled={loading}
+            disabled={loading || !emailVerified}
           >
             <UserPlus size={18} />
             {loading ? 'Creating account...' : 'Create Account'}

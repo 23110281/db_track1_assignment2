@@ -35,6 +35,8 @@ export async function api(path, options = {}) {
 export const authApi = {
   login: (username, password) => api('/auth/login', { method: 'POST', body: { username, password } }),
   register: (data) => api('/auth/register', { method: 'POST', body: data }),
+  sendOtp: (email) => api('/auth/send-otp', { method: 'POST', body: { email } }),
+  verifyOtp: (email, otp) => api('/auth/verify-otp', { method: 'POST', body: { email, otp } }),
 };
 
 // Posts
