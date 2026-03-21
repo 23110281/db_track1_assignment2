@@ -48,7 +48,7 @@ def _set_audit_session_vars(cursor):
 
 def execute_db(sql, args=None):
     conn = get_db()
-    cursor = conn.cursor()
+    cursor = conn.cursor(buffered=True)
     _set_audit_session_vars(cursor)
     cursor.execute(sql, args or ())
     conn.commit()

@@ -532,6 +532,18 @@ def run():
         (6, 2, 4, "Team, I've pushed the ER diagram to the repo. Please review and suggest changes before tomorrow's meeting.", None, '2026-03-11 20:15:00'),
         (7, 7, None, 'Office hours for Algorithms (CS301) have been moved to Wednesday 3-5 PM this week due to faculty meeting on Monday.', None, '2026-03-10 09:00:00'),
         (8, 5, 1, 'Anyone up for a study session at the library tonight? Working on the databases assignment and could use some company.', None, '2026-03-10 17:00:00'),
+        # More group messages
+        (9, 1, 4, 'I have added indexing on all the major query columns. Benchmark shows ~25% average speedup. Check benchmark.py output.', None, '2026-03-16 10:00:00'),
+        (10, 3, 4, 'Great work! I have completed the audit logging module. Every API call is now tracked in audit.log.', None, '2026-03-16 11:30:00'),
+        (11, 2, 4, 'Guys, I have finished the frontend integration for groups and polls. Everything is connected to the API now.', None, '2026-03-16 14:00:00'),
+        (12, 5, 4, 'The seed data is looking good. I added attendance records for all students across both semesters.', None, '2026-03-17 09:15:00'),
+        (13, 1, 1, 'Mid-semester marks are out! Check the portal. CS432 average was 28/40.', None, '2026-03-16 16:00:00'),
+        (14, 2, 1, 'Does anyone have notes for the concurrency control lecture? I missed that class.', None, '2026-03-17 11:00:00'),
+        (15, 10, 2, 'Weekly contest results are in! Congratulations to Shriniket for solving all 4 problems. Leaderboard updated on the club website.', None, '2026-03-15 20:00:00'),
+        (16, 5, 2, 'Thanks everyone! The contest problems were really interesting, especially the graph one.', None, '2026-03-15 20:30:00'),
+        (17, 3, 3, 'Captured some amazing shots of the new academic block at golden hour. Will share the album link soon!', None, '2026-03-14 18:00:00'),
+        (18, 2, 5, 'Compiled a list of must-do DSA problems for placement prep. Sharing the Google Doc link in the files section.', None, '2026-03-13 15:00:00'),
+        (19, 1, 5, 'Mock interview sessions starting next week. Sign up sheet is pinned. Slots filling up fast!', None, '2026-03-14 10:30:00'),
     ]
     cursor.executemany(
         "INSERT INTO Post (PostID, AuthorID, GroupID, Content, ImageURL, CreatedAt) VALUES (%s,%s,%s,%s,%s,%s)",
@@ -546,6 +558,15 @@ def run():
         (5, 2, 3, 'Will the submission be through GitHub only?', '2026-03-14 11:00:00'),
         (6, 3, 1, 'Count me in! Looking for teammates.', '2026-03-13 17:00:00'),
         (7, 5, 1, 'Thanks Rahul bhaiya! Just submitted my referral request.', '2026-03-12 12:00:00'),
+        # Comments on group posts
+        (8, 9, 2, 'Nice! Which queries showed the biggest improvement?', '2026-03-16 10:30:00'),
+        (9, 9, 3, 'Global feed and attendance queries had ~80% speedup.', '2026-03-16 10:45:00'),
+        (10, 6, 1, 'Looks good, I have a few suggestions on the cardinality constraints. Will comment on the repo.', '2026-03-11 21:00:00'),
+        (11, 6, 3, 'Also, should we add a separate table for notifications?', '2026-03-11 21:30:00'),
+        (12, 13, 3, 'Not bad! But the normalization questions were tricky.', '2026-03-16 16:30:00'),
+        (13, 15, 1, 'Congrats Shriniket! Those graph problems were really tough.', '2026-03-15 20:15:00'),
+        (14, 14, 3, 'I have notes, will share on WhatsApp.', '2026-03-17 11:30:00'),
+        (15, 18, 1, 'This is super helpful! Thanks Parthiv.', '2026-03-13 15:30:00'),
     ]
     cursor.executemany(
         "INSERT INTO Comment (CommentID, PostID, AuthorID, Content, CreatedAt) VALUES (%s,%s,%s,%s,%s)",
@@ -557,6 +578,15 @@ def run():
         (2, 1), (2, 2), (2, 3),
         (3, 1), (3, 2),
         (5, 1), (5, 2), (5, 3),
+        # Likes on group posts
+        (9, 2), (9, 3), (9, 5),
+        (10, 1), (10, 2),
+        (11, 1), (11, 3), (11, 5),
+        (13, 2), (13, 3),
+        (15, 1), (15, 3), (15, 5),
+        (17, 1), (17, 2), (17, 4),
+        (18, 1), (18, 3), (18, 5),
+        (19, 2), (19, 3),
     ]
     cursor.executemany(
         "INSERT INTO PostLike (PostID, MemberID) VALUES (%s,%s)",

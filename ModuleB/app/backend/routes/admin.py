@@ -1,7 +1,8 @@
 from functools import wraps
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from db import query_db, execute_db
+import traceback
+from db import query_db, execute_db, get_db
 from audit import log_action, log_to_db, get_current_username
 
 admin_bp = Blueprint('admin', __name__)
@@ -146,3 +147,40 @@ def delete_group(group_id):
     execute_db("DELETE FROM CampusGroup WHERE GroupID = %s", (group_id,))
     log_action('ADMIN_DELETE_GROUP', f"Admin deleted group {group_id}", user=get_current_username())
     return jsonify(message='Group deleted')
+
+
+@admin_bp.route('/query', methods=['POST'])
+@admin_required
+def run_query():
+    data = request.get_json()
+    sql = (data.get('query') or '').strip()
+    if not sql:
+        return jsonify(error='Query is required'), 400
+
+    username = get_current_username()
+    log_action('ADMIN_SQL_QUERY', f"Admin executed SQL: {sql[:500]}", user=username)
+
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(sql)
+
+        # Determine if this is a SELECT-type query
+        if cursor.description:
+            rows = cursor.fetchall()
+            # Convert non-serializable types to strings
+            for row in rows:
+                for key, val in row.items():
+                    if not isinstance(val, (str, int, float, bool, type(None))):
+                        row[key] = str(val)
+            cursor.close()
+            conn.close()
+            return jsonify(type='select', rows=rows, rowCount=len(rows))
+        else:
+            affected = cursor.rowcount
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return jsonify(type='modify', affectedRows=affected)
+    except Exception as e:
+        return jsonify(error=str(e)), 400

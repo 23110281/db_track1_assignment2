@@ -51,6 +51,12 @@ export default function Navbar() {
           placeholder="Search people, groups, posts..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && searchQuery.trim()) {
+              navigate(`/members?q=${encodeURIComponent(searchQuery.trim())}`);
+              setSearchQuery('');
+            }
+          }}
           style={styles.searchInput}
         />
       </div>

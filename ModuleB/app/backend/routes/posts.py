@@ -194,7 +194,9 @@ def delete_comment(comment_id):
     comment = query_db("SELECT * FROM Comment WHERE CommentID = %s", (comment_id,), one=True)
     if not comment:
         return jsonify(error='Comment not found'), 404
-    if comment['AuthorID'] != user_id:
+
+    member = query_db("SELECT IsAdmin FROM Member WHERE MemberID = %s", (user_id,), one=True)
+    if comment['AuthorID'] != user_id and not member.get('IsAdmin'):
         return jsonify(error='Unauthorized'), 403
 
     execute_db("DELETE FROM Comment WHERE CommentID = %s", (comment_id,))

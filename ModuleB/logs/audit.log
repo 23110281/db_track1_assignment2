@@ -26,3 +26,55 @@
 [2026-03-22 01:15:31] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/posts] [IP:127.0.0.1] — POST /api/posts -> 201
 [2026-03-22 01:15:33] [INFO] [USER:ridhamp4] [ACTION:LIKE_POST] [ENDPOINT:/api/posts/11/like] [IP:127.0.0.1] — Liked post 11
 [2026-03-22 01:15:33] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/posts/11/like] [IP:127.0.0.1] — POST /api/posts/11/like -> 200
+[2026-03-22 01:18:33] [INFO] [USER:ridhamp4] [ACTION:CREATE_COMMENT] [ENDPOINT:/api/posts/2/comments] [IP:127.0.0.1] — Created comment 10 on post 2
+[2026-03-22 01:18:33] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/posts/2/comments] [IP:127.0.0.1] — POST /api/posts/2/comments -> 201
+[2026-03-22 01:18:42] [INFO] [USER:ridhamp4] [ACTION:UPDATE_COMMENT] [ENDPOINT:/api/comments/10] [IP:127.0.0.1] — Updated comment 10
+[2026-03-22 01:18:42] [INFO] [USER:ridhamp4] [ACTION:PUT] [ENDPOINT:/api/comments/10] [IP:127.0.0.1] — PUT /api/comments/10 -> 200
+[2026-03-22 01:18:45] [INFO] [USER:ridhamp4] [ACTION:DELETE_COMMENT] [ENDPOINT:/api/comments/10] [IP:127.0.0.1] — Deleted comment 10
+[2026-03-22 01:18:45] [INFO] [USER:ridhamp4] [ACTION:DELETE] [ENDPOINT:/api/comments/10] [IP:127.0.0.1] — DELETE /api/comments/10 -> 200
+[2026-03-22 01:32:40] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully
+[2026-03-22 01:32:59] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully
+[2026-03-22 01:34:32] [INFO] [USER:anonymous] [ACTION:SEND_OTP] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — OTP sent to ridham.patel@iitgn.ac.in
+[2026-03-22 01:35:08] [INFO] [USER:anonymous] [ACTION:VERIFY_OTP] [ENDPOINT:/api/auth/verify-otp] [IP:127.0.0.1] — Email ridham.patel@iitgn.ac.in verified successfully
+[2026-03-22 01:36:16] [INFO] [USER:anonymous] [ACTION:SEND_OTP] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — OTP sent to ridham.patel@iitgn.ac.in
+[2026-03-22 01:36:32] [INFO] [USER:anonymous] [ACTION:VERIFY_OTP] [ENDPOINT:/api/auth/verify-otp] [IP:127.0.0.1] — Email ridham.patel@iitgn.ac.in verified successfully
+[2026-03-22 01:37:46] [INFO] [USER:anonymous] [ACTION:SEND_OTP] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — OTP sent to test@iitgn.ac.in
+[2026-03-22 01:39:35] [INFO] [USER:anonymous] [ACTION:SEND_OTP] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — OTP sent to newtest@iitgn.ac.in
+[2026-03-22 01:40:32] [INFO] [USER:anonymous] [ACTION:SEND_OTP] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — OTP sent to testcors@iitgn.ac.in
+[2026-03-22 01:41:21] [INFO] [USER:anonymous] [ACTION:SEND_OTP] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — OTP sent to fulltest@iitgn.ac.in
+[2026-03-22 01:42:26] [INFO] [USER:anonymous] [ACTION:SEND_OTP] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — OTP sent to ridham.patel@iitgn.ac.in
+[2026-03-22 01:42:55] [INFO] [USER:anonymous] [ACTION:VERIFY_OTP] [ENDPOINT:/api/auth/verify-otp] [IP:127.0.0.1] — Email ridham.patel@iitgn.ac.in verified successfully
+[2026-03-22 01:42:57] [INFO] [USER:ridhamp4] [ACTION:REGISTER] [ENDPOINT:/api/auth/register] [IP:127.0.0.1] — New Student registered: 'ridhamp4' (ID: 16)
+[2026-03-22 01:43:08] [INFO] [USER:ridhamp4] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'ridhamp4' logged in successfully
+[2026-03-22 01:43:13] [INFO] [USER:ridhamp4] [ACTION:CREATE_POST] [ENDPOINT:/api/posts] [IP:127.0.0.1] — Created post 20 in group None
+[2026-03-22 01:43:13] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/posts] [IP:127.0.0.1] — POST /api/posts -> 201
+[2026-03-22 01:43:15] [INFO] [USER:ridhamp4] [ACTION:LIKE_POST] [ENDPOINT:/api/posts/20/like] [IP:127.0.0.1] — Liked post 20
+[2026-03-22 01:43:15] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/posts/20/like] [IP:127.0.0.1] — POST /api/posts/20/like -> 200
+[2026-03-22 01:43:24] [INFO] [USER:ridhamp4] [ACTION:JOIN_GROUP] [ENDPOINT:/api/groups/1/join] [IP:127.0.0.1] — Joined group 1
+[2026-03-22 01:43:24] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/groups/1/join] [IP:127.0.0.1] — POST /api/groups/1/join -> 200
+[2026-03-22 01:43:27] [INFO] [USER:ridhamp4] [ACTION:JOIN_GROUP] [ENDPOINT:/api/groups/2/join] [IP:127.0.0.1] — Joined group 2
+[2026-03-22 01:43:27] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/groups/2/join] [IP:127.0.0.1] — POST /api/groups/2/join -> 200
+[2026-03-22 01:43:27] [INFO] [USER:ridhamp4] [ACTION:JOIN_GROUP] [ENDPOINT:/api/groups/3/join] [IP:127.0.0.1] — Joined group 3
+[2026-03-22 01:43:27] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/groups/3/join] [IP:127.0.0.1] — POST /api/groups/3/join -> 200
+[2026-03-22 01:43:33] [INFO] [USER:ridhamp4] [ACTION:JOIN_GROUP] [ENDPOINT:/api/groups/5/join] [IP:127.0.0.1] — Joined group 5
+[2026-03-22 01:43:33] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/groups/5/join] [IP:127.0.0.1] — POST /api/groups/5/join -> 200
+[2026-03-22 01:43:34] [INFO] [USER:ridhamp4] [ACTION:JOIN_GROUP] [ENDPOINT:/api/groups/4/join] [IP:127.0.0.1] — Joined group 4
+[2026-03-22 01:43:34] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/groups/4/join] [IP:127.0.0.1] — POST /api/groups/4/join -> 200
+[2026-03-22 01:43:47] [INFO] [USER:ridhamp4] [ACTION:LIKE_POST] [ENDPOINT:/api/posts/14/like] [IP:127.0.0.1] — Liked post 14
+[2026-03-22 01:43:47] [INFO] [USER:ridhamp4] [ACTION:POST] [ENDPOINT:/api/posts/14/like] [IP:127.0.0.1] — POST /api/posts/14/like -> 200
+[2026-03-22 01:44:15] [INFO] [USER:admin_user] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'admin_user' logged in successfully
+[2026-03-22 01:44:32] [INFO] [USER:admin_user] [ACTION:ADMIN_DELETE_MEMBER] [ENDPOINT:/api/admin/members/3] [IP:127.0.0.1] — Admin deleted member 3
+[2026-03-22 01:44:32] [INFO] [USER:admin_user] [ACTION:DELETE] [ENDPOINT:/api/admin/members/3] [IP:127.0.0.1] — DELETE /api/admin/members/3 -> 200
+[2026-03-22 01:45:14] [INFO] [USER:admin_user] [ACTION:JOIN_GROUP] [ENDPOINT:/api/groups/1/join] [IP:127.0.0.1] — Joined group 1
+[2026-03-22 01:45:14] [INFO] [USER:admin_user] [ACTION:POST] [ENDPOINT:/api/groups/1/join] [IP:127.0.0.1] — POST /api/groups/1/join -> 200
+[2026-03-22 01:55:08] [INFO] [USER:admin_user] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'admin_user' logged in successfully
+[2026-03-22 01:55:41] [INFO] [USER:admin_user] [ACTION:ADMIN_SQL_QUERY] [ENDPOINT:/api/admin/query] [IP:127.0.0.1] — Admin executed SQL: select * from member limit 10
+[2026-03-22 01:55:41] [INFO] [USER:admin_user] [ACTION:POST] [ENDPOINT:/api/admin/query] [IP:127.0.0.1] — POST /api/admin/query -> 200
+[2026-03-22 01:56:34] [INFO] [USER:admin_user] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'admin_user' logged in successfully
+[2026-03-22 01:57:24] [INFO] [USER:admin_user] [ACTION:ADMIN_SQL_QUERY] [ENDPOINT:/api/admin/query] [IP:127.0.0.1] — Admin executed SQL: select * from member limit 11
+[2026-03-22 01:57:24] [INFO] [USER:admin_user] [ACTION:POST] [ENDPOINT:/api/admin/query] [IP:127.0.0.1] — POST /api/admin/query -> 200
+[2026-03-22 02:00:22] [INFO] [USER:admin_user] [ACTION:CREATE_REFERRAL] [ENDPOINT:/api/referrals] [IP:127.0.0.1] — Created referral request 5 for Google - Software Engineer - L4
+[2026-03-22 02:00:22] [INFO] [USER:admin_user] [ACTION:POST] [ENDPOINT:/api/referrals] [IP:127.0.0.1] — POST /api/referrals -> 201
+[2026-03-22 02:04:19] [INFO] [USER:admin_user] [ACTION:CREATE_REFERRAL] [ENDPOINT:/api/referrals] [IP:127.0.0.1] — Created referral request 6 for Microsoft - SDE Intern - Summer 2026
+[2026-03-22 02:04:19] [INFO] [USER:admin_user] [ACTION:POST] [ENDPOINT:/api/referrals] [IP:127.0.0.1] — POST /api/referrals -> 201
+[2026-03-22 02:08:59] [INFO] [USER:alumni_rahul] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'alumni_rahul' logged in successfully

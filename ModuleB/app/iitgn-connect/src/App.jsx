@@ -14,6 +14,7 @@ import Polls from './pages/Polls';
 import Admin from './pages/Admin';
 import Members from './pages/Members';
 import Settings from './pages/Settings';
+import QueryConsole from './pages/QueryConsole';
 import './App.css';
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
             <Route path="/admin" element={<Admin />} />
             <Route path="/members" element={<Members />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/query-console" element={<QueryConsole />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

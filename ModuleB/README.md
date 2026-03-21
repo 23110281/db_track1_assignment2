@@ -235,7 +235,9 @@ You can also log in with email instead of username (e.g., `laksh.jain@iitgn.ac.i
 ### Security
 - **JWT Authentication** — 24-hour token expiry, `@jwt_required()` on all protected routes
 - **Audit Logging** — Dual-channel: file (`logs/audit.log`) + database (`AuditLog` table)
-- **Unauthorized Access Detection** — MySQL triggers flag direct DB modifications that bypass the API
+- **Unauthorized API Request Detection** — Custom JWT error handlers (`unauthorized_loader`, `expired_token_loader`, `invalid_token_loader`) catch and log all unauthorized API access attempts (missing token, expired token, tampered token) to `audit.log` with `IsAuthorized = FALSE`
+- **RBAC Violation Logging** — Non-admin users attempting admin endpoints are logged as `FORBIDDEN_ACCESS` in `audit.log`
+- **Direct DB Modification Detection** — 63 MySQL triggers (INSERT/UPDATE/DELETE on all 21 tables) detect operations that bypass the API. API calls set `@app_username` session variable; direct SQL access leaves it NULL, flagging as `DIRECT_DB_ACCESS` with `IsAuthorized = FALSE` in the AuditLog table
 - **Password Security** — bcrypt hashing with salt
 
 ---
@@ -321,6 +323,62 @@ View the full optimization report in `report.ipynb` (Jupyter Notebook).
 **Jobs:** JobPost, ReferralRequest
 **Profile:** ProfileClaimQuestion, ProfileClaimVote
 **Security:** AuditLog
+
+---
+
+## Security & Audit Logging
+
+IITGN Connect uses a two-layer security logging system to detect unauthorized access:
+
+### Layer 1: Unauthorized API Request Detection (`audit.log`)
+
+All failed authentication attempts are logged to `logs/audit.log`:
+
+```
+# Missing JWT token
+[USER:UNAUTHORIZED] [ACTION:UNAUTHORIZED_ACCESS] — Missing/invalid JWT on GET /api/posts
+
+# Expired JWT token
+[USER:EXPIRED_TOKEN] [ACTION:UNAUTHORIZED_ACCESS] — Expired JWT (user_id=1) on GET /api/posts
+
+# Tampered/fake JWT token
+[USER:INVALID_TOKEN] [ACTION:UNAUTHORIZED_ACCESS] — Invalid/tampered JWT on GET /api/posts
+
+# Non-admin user accessing admin endpoint
+[USER:laksh_jain] [ACTION:FORBIDDEN_ACCESS] — Non-admin user 'laksh_jain' attempted GET /api/admin/stats
+```
+
+To view unauthorized API attempts:
+```bash
+# Show all unauthorized access attempts
+grep -E "UNAUTHORIZED|FORBIDDEN|INVALID_TOKEN|EXPIRED_TOKEN" logs/audit.log
+```
+
+### Layer 2: Direct DB Modification Detection (AuditLog table)
+
+63 MySQL triggers (INSERT/UPDATE/DELETE on all 21 tables) detect operations that bypass the API:
+
+```sql
+-- API-based operation (authorized):
+-- @app_username is set by db.py before every query
+-- Trigger logs: IsAuthorized = TRUE, Username = 'laksh_jain'
+
+-- Direct SQL access (unauthorized):
+-- @app_username is NULL (not set by any API call)
+-- Trigger logs: IsAuthorized = FALSE, Username = 'DIRECT_DB_ACCESS'
+
+-- To find all unauthorized direct DB modifications:
+SELECT * FROM AuditLog WHERE IsAuthorized = FALSE;
+```
+
+To test unauthorized DB detection:
+```sql
+-- Run this directly in MySQL CLI (bypasses the API)
+UPDATE Post SET Content = 'Hacked!' WHERE PostID = 1;
+
+-- Check the AuditLog — it will be flagged as unauthorized
+SELECT * FROM AuditLog WHERE IsAuthorized = FALSE AND Action = 'UPDATE_POST';
+```
 
 ---
 

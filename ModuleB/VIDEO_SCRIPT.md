@@ -1,192 +1,190 @@
-# IITGN Connect - Video Demo Script (3-5 minutes)
-## Narrators: Parthiv, Shriniket, Ridham
+# IITGN Connect — Video Demo Script (3-5 minutes)
+
+**Narrators:** Parthiv, Shriniket, Ridham
+**Format:** Screen recording with voice-over
 
 ---
 
-## INTRO (0:00 - 0:15) — Parthiv
+## INTRO (Parthiv) — 15 seconds
 
-**[Screen: Browser on Login page]**
+> "Hi, we are Parthiv, Shriniket, and Ridham. This is IITGN Connect — a college social media platform built with React, Flask, and MySQL for our CS 432 Databases assignment. Let me walk you through our implementation."
 
-> "Hi, this is our CS432 Databases Assignment 2 Module B submission — IITGN Connect, a college social media platform. I'm Parthiv, and along with Shriniket and Ridham, we'll walk you through our UI, API functionality, RBAC enforcement, and security logging."
-
----
-
-## PART 1: UI & API Functionality (0:15 - 2:00) — Parthiv
-
-### 1a. Registration with OTP (0:15 - 0:35)
-
-**[Screen: Click "Register" on login page]**
-
-> "Let's start with registration. Our system requires an @iitgn.ac.in email. I'll enter a name, username, and email."
-
-**[Screen: Type in details, click "Send OTP"]**
-
-> "We use Gmail SMTP to send a 6-digit OTP for email verification. Once verified, bcrypt hashes the password before storing it in MySQL."
-
-**[Screen: Enter OTP, complete registration]**
-
-> "Notice the warning — email cannot be changed after registration, which is an intentional security design choice."
-
-### 1b. Login & Feed — CRUD on Posts (0:35 - 1:10)
-
-**[Screen: Login as `laksh_jain` / `password123`]**
-
-> "Now logging in as Laksh. You can use either username or email to log in. The backend issues a JWT token valid for 24 hours."
-
-**[Screen: Show global feed with posts]**
-
-> "This is our global feed — it fetches posts with author info, like counts, and comment counts using JOINs and correlated subqueries. Group-only posts are filtered out here."
-
-**[Screen: Create a new post — type content, optionally upload image]**
-
-> "Let me create a post — this calls POST /api/posts. I can also attach an image."
-
-**[Screen: Click 3-dot menu on own post → Edit → Save]**
-
-> "I can edit my own posts via the 3-dot menu — this calls PUT /api/posts/:id."
-
-**[Screen: Click 3-dot menu → Delete → Confirm]**
-
-> "And delete it — DELETE /api/posts/:id. Only the post author or a system admin can do this."
-
-**[Screen: Like a post, add a comment]**
-
-> "I can also like posts and add comments — each is a separate API call with JWT authentication."
-
-### 1c. Member Portfolio / Profile (1:10 - 1:30)
-
-**[Screen: Click on own profile from sidebar]**
-
-> "The Member Portfolio shows all profile details — name, email, member type, contact number, address with a privacy toggle, and recent posts."
-
-**[Screen: Show profile claims section]**
-
-> "We also have Profile Claims — a Q&A verification feature where other users can vote to verify your claims."
-
-**[Screen: Go to Settings page]**
-
-> "In Settings, users can update their name, contact, address, change their username with OTP verification, or change their password. Email is intentionally locked and cannot be changed."
-
-### 1d. Groups, Jobs, Polls, Attendance (1:30 - 2:00)
-
-**[Screen: Navigate to Groups page]**
-
-> "Users can browse, create, and join groups. Groups can be public or restricted — restricted groups require admin approval."
-
-**[Screen: Open a group → show posts inside]**
-
-> "Each group has its own feed — these posts only appear here, not in the global feed."
-
-**[Screen: Quickly show Jobs page]**
-
-> "Alumni users can post job listings and manage referral requests from students."
-
-**[Screen: Quickly show Polls page]**
-
-> "The polling system lets anyone create polls and vote — results update in real time."
-
-**[Screen: Quickly show Attendance page]**
-
-> "Students can track class and mess attendance with streaks, breakdowns, and a leaderboard."
+**Screen:** Show the login page with the IITGN Connect logo.
 
 ---
 
-## PART 2: RBAC Enforcement (2:00 - 3:00) — Shriniket
+## SECTION 1: UI & API Functionality (Ridham) — 90 seconds
 
-### 2a. Admin Login & Dashboard (2:00 - 2:30)
+### 1a. Authentication (20s)
 
-**[Screen: Logout → Login as `admin_user` / `password123`]**
+> "Our platform supports authentication with email OTP verification. Users can register only with an @iitgn.ac.in email. On registration, an OTP is sent via Gmail SMTP to verify the email."
 
-> "Now I'll demonstrate Role-Based Access Control. I'm logging in as our System Admin account."
+**Screen:** Show the Registration page. Type in an email, click "Send OTP". Show the OTP input field.
 
-**[Screen: Show Admin Dashboard with stats]**
+> "Users can login with either their username or email. We also have a forgot password flow that sends an OTP to reset the password."
 
-> "The Admin Dashboard shows system-wide statistics — total members, posts, groups, polls, comments, and jobs. This page is protected by an `admin_required` decorator that checks the `IsAdmin` flag on the Member table."
+**Screen:** Show Login page — point out "Username or Email" label and "Forgot password?" link.
 
-**[Screen: Show Members management tab — list of all members]**
+### 1b. Member Portfolio / Profile (20s)
 
-> "As admin, I can view all members, update their details, or delete accounts. Let me delete a test member to demonstrate."
+> "Each member has a profile page showing their details, groups they belong to, and recent posts. We support four member types — Student, Professor, Alumni, and Organization — each with specific attributes."
 
-**[Screen: Delete a member → show success]**
+**Screen:** Navigate to a profile page (e.g., Laksh Jain). Show the member info, groups section, and recent posts.
 
-> "The deletion cascades — removing the member also removes their posts, comments, group memberships, and all related data through ON DELETE CASCADE foreign keys."
+> "Profile also has a claims section where other users can make claims about you and the community votes on them."
 
-**[Screen: Show Groups management — delete a group]**
+### 1c. CRUD Operations on Posts (25s)
 
-> "Similarly, I can delete any group. As admin, I can also delete anyone's post from the feed — not just my own."
+> "On the global feed, users can create posts with text and images. You can like posts, and comment on them."
 
-### 2b. Regular User — Restricted Access (2:30 - 3:00)
+**Screen:** Create a new post with some text. Show it appear in the feed. Like it. Open comments, type a comment, submit.
 
-**[Screen: Logout → Login as `ridham_p` / `password123`]**
+> "Users can edit or delete their own posts using the three-dot menu."
 
-> "Now logging in as Ridham, a regular user. Notice there's no Admin option in the sidebar."
+**Screen:** Click the 3-dot menu on your own post. Click Edit, change text, save. Then show delete option.
 
-**[Screen: Try navigating to /admin directly in URL bar]**
+### 1d. Groups (25s)
 
-> "Even if I manually type /admin in the URL, the backend returns a 403 Forbidden. The `admin_required` decorator checks `IsAdmin` from the database — it's not just a frontend check."
+> "Users can create groups — either public or restricted. Restricted groups require admin approval to join."
 
-**[Screen: Show that Ridham can only edit/delete own posts, not others']**
+**Screen:** Show the Groups page. Click "Create Group". Fill in name, description, toggle "Restricted". Create it.
 
-> "As a regular user, I can only see the 3-dot menu on my own posts. I cannot edit or delete other users' posts. The backend also enforces this — even if someone crafts a direct API call, the AuthorID check prevents unauthorized modifications."
+> "Group admins can approve or reject join requests, kick members, and promote members to admin. Posts within groups only appear in the My Groups feed tab, not the global feed."
 
-**[Screen: Show Members page — read-only view]**
-
-> "I can browse members and view profiles, but I have no admin controls. This demonstrates our two-tier RBAC — Admin has full CRUD access while regular users have ownership-scoped permissions."
+**Screen:** Show a restricted group with pending requests. Approve one. Show the 3-dot menu on a member (Make Admin / Kick).
 
 ---
 
-## PART 3: Security Logging (3:00 - 3:50) — Ridham
+## SECTION 2: RBAC Enforcement (Shriniket) — 60 seconds
 
-### 3a. Audit Log File (3:00 - 3:20)
+### 2a. Admin Login (25s)
 
-**[Screen: Open terminal, run `cat logs/audit.log | tail -20`]**
+> "Now let me demonstrate our Role-Based Access Control. I'll first login as the admin user."
 
-> "Our security logging has two channels. First, the file-based audit log. Every data-modifying API call — POST, PUT, DELETE — is logged with timestamp, username, action type, endpoint, IP address, and operation details."
+**Screen:** Login as `admin_user` / `password123`.
 
-**[Screen: Highlight a few log lines]**
+> "As an admin, I have access to the Admin Dashboard which shows system statistics — total members, posts, groups, comments. I can also manage all members and groups from here — edit roles, toggle admin status, or delete members."
 
-> "For example, here you can see the login event, the post creation, the delete operation we just performed as admin — all timestamped and attributed to the correct user."
+**Screen:** Navigate to Admin Dashboard. Show stats. Show member list. Toggle a user's admin status or change their role.
 
-### 3b. Database Audit Log Table (3:20 - 3:40)
+### 2b. Regular User — Restricted Access (20s)
 
-**[Screen: Open MySQL terminal or any SQL client, run `SELECT * FROM AuditLog ORDER BY Timestamp DESC LIMIT 10;`]**
+> "Now I'll logout and login as a regular user — laksh_jain."
 
-> "Second channel — the AuditLog database table. Same information stored in MySQL for queryable analysis. Notice the IsAuthorized column — all API operations are marked TRUE."
+**Screen:** Logout. Login as `laksh_jain` / `password123`.
 
-**[Screen: Run a direct SQL modification to trigger the unauthorized access detection]**
+> "Notice that the Admin Dashboard option is not visible in the sidebar for regular users. The admin route is completely hidden."
 
-> "Now watch this — if someone tries to modify data directly through SQL, bypassing the API..."
+**Screen:** Show the sidebar — no Admin option visible.
 
-**[Screen: Run `UPDATE Member SET Name='Hacked' WHERE MemberID=3;` directly in MySQL]**
+### 2c. API-Level RBAC (15s)
 
-> "...our MySQL triggers detect this. The trigger checks for the absence of our session variables that only the Flask API sets. It logs this as IsAuthorized = FALSE."
+> "Even if someone tries to access the admin API directly — for example by calling /api/admin/stats — our backend rejects it with a 403 Forbidden error and logs it as a FORBIDDEN_ACCESS attempt."
 
-**[Screen: Run `SELECT * FROM AuditLog WHERE IsAuthorized = FALSE;` — show the flagged entry]**
+**Screen:** Open browser DevTools (Network tab). Try navigating to admin URL directly or use curl:
+```
+curl http://localhost:5001/api/admin/stats -H "Authorization: Bearer <laksh_token>"
+```
+Show the 403 response.
 
-> "Here it is — the unauthorized modification is flagged. This is how we detect and log direct database tampering versus legitimate API operations."
-
-### 3c. Wrap-up (3:40 - 3:50)
-
-**[Screen: Show the report.ipynb briefly]**
-
-> "All our benchmarking results, EXPLAIN plan analysis, and indexing strategy are documented in our optimization report. Thank you for watching."
+> "This is enforced by the admin_required decorator which checks the IsAdmin flag in the database before allowing access."
 
 ---
 
-## QUICK REFERENCE — Login Credentials
+## SECTION 3: Security Logging (Parthiv) — 60 seconds
 
-| User | Username | Password | Role |
-|------|----------|----------|------|
-| Admin | `admin_user` | `password123` | Admin (IsAdmin=TRUE) |
-| Student | `laksh_jain` | `password123` | Regular User |
-| Student | `ridham_p` | `password123` | Regular User |
-| Alumni | `alumni_rahul` | `password123` | Regular User (can post jobs) |
+### 3a. Audit Log File — Authorized Operations (20s)
 
-## CHECKLIST — Rubric Coverage
+> "Every data-modifying API operation is logged to our audit.log file with timestamps, usernames, actions, endpoints, and IP addresses."
 
-- [x] **UI & API Functionality (20 marks)**: Registration, login, feed, CRUD on posts/comments/likes, profile, groups, jobs, polls, attendance
-- [x] **RBAC Enforcement (10 marks)**: Admin dashboard demo, regular user restrictions, 403 on unauthorized access, ownership checks
-- [x] **Security Logging (10 marks)**: File-based audit.log, AuditLog DB table, unauthorized modification detection via MySQL triggers
-- [x] **Database Optimization (10 marks)**: 26 indexes across 13 tables, benchmark.py with before/after measurements
-- [x] **Optimization Report (10 marks)**: report.ipynb with EXPLAIN plans, benchmark charts, documentation
-- [x] **Video with Audio (10 marks)**: Clear narration by 3 team members, covers all required topics
+**Screen:** Open terminal. Run:
+```bash
+cat logs/audit.log
+```
+
+> "Here you can see successful login attempts, post creations, likes, comments — all with the actual authenticated username."
+
+**Screen:** Highlight a few log lines showing `[USER:laksh_jain] [ACTION:POST]` etc.
+
+### 3b. Unauthorized API Requests (20s)
+
+> "Now let me show how we detect unauthorized API access. I'll make a request without any JWT token."
+
+**Screen:** Run in terminal:
+```bash
+curl http://localhost:5001/api/posts
+```
+
+Show the 401 response, then:
+```bash
+grep "UNAUTHORIZED" logs/audit.log
+```
+
+> "The log clearly shows UNAUTHORIZED ACCESS — missing JWT. Similarly, expired tokens and tampered tokens are all caught and logged. And as we saw, non-admin users trying admin endpoints are logged as FORBIDDEN ACCESS."
+
+**Screen:** Highlight the `UNAUTHORIZED_ACCESS` and `FORBIDDEN_ACCESS` entries in the log.
+
+### 3c. Direct Database Modification Detection (20s)
+
+> "Finally, we have 63 MySQL triggers across all 21 tables that detect direct database modifications — someone bypassing our API entirely and running SQL directly."
+
+**Screen:** Open MySQL CLI:
+```sql
+mysql -u root -proot iitgn_connect
+UPDATE Post SET Content = 'Hacked post!' WHERE PostID = 1;
+```
+
+Then:
+```sql
+SELECT Timestamp, Username, Action, Details, IsAuthorized
+FROM AuditLog WHERE IsAuthorized = FALSE ORDER BY Timestamp DESC LIMIT 5;
+```
+
+> "The trigger caught it — Username is 'DIRECT_DB_ACCESS', Endpoint is 'DIRECT_SQL', and IsAuthorized is FALSE. Compare this with API-based operations which show the real username and IsAuthorized as TRUE. This way, any unauthorized database modifications are easily identifiable."
+
+**Screen:** Show the query result highlighting `DIRECT_DB_ACCESS` with `IsAuthorized = 0`.
+
+---
+
+## CLOSING (Ridham) — 10 seconds
+
+> "That covers our IITGN Connect platform — full CRUD operations, role-based access control, and comprehensive security logging at both the API and database level. Thank you!"
+
+**Screen:** Show the IITGN Connect home page.
+
+---
+
+## KEY TIMESTAMPS
+
+| Time | Section | Narrator |
+|------|---------|----------|
+| 0:00 | Intro | Parthiv |
+| 0:15 | Authentication & Registration | Ridham |
+| 0:35 | Member Portfolio / Profile | Ridham |
+| 0:55 | CRUD on Posts (create, edit, delete, like, comment) | Ridham |
+| 1:20 | Groups (create, restricted, approve, kick) | Ridham |
+| 1:45 | RBAC — Admin Login & Dashboard | Shriniket |
+| 2:10 | RBAC — Regular User Restrictions | Shriniket |
+| 2:30 | RBAC — API-Level 403 Enforcement | Shriniket |
+| 2:45 | Audit Log — Authorized Operations | Parthiv |
+| 3:05 | Unauthorized API Request Detection | Parthiv |
+| 3:25 | Direct DB Modification Detection (Triggers) | Parthiv |
+| 3:45 | Closing | Ridham |
+
+---
+
+## CHECKLIST (Rubric Coverage)
+
+- [x] **UI & API Functionality** (20 marks) — Login, Registration, Member Portfolio, Global Feed, Posts CRUD, Groups, Comments, Likes
+- [x] **RBAC Enforcement** (10 marks) — Admin vs Regular User login, admin dashboard access, 403 on unauthorized admin access, admin_required decorator
+- [x] **Security Logging** (10 marks) — audit.log with authorized operations, unauthorized API requests (401), RBAC violations (403), direct DB modifications detected via triggers (IsAuthorized=FALSE)
+- [x] **Clear Audio Narration** — Three narrators covering all sections with explanations of implementation details
+
+## TIPS FOR RECORDING
+
+1. **Keep MySQL CLI open** in a terminal tab before recording — saves time
+2. **Pre-clear audit.log** before recording so entries are clean: `> logs/audit.log`
+3. **Pre-login** as admin_user in one browser and laksh_jain in an incognito window for quick switching
+4. **Zoom in** on terminal text so it's readable in the video
+5. **Practice once** before recording — aim for 3:30-4:00 minutes
+6. Upload to **YouTube (Unlisted)** or **Google Drive** and paste link in `report.ipynb`

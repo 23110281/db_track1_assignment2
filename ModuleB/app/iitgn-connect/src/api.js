@@ -134,6 +134,7 @@ export const adminApi = {
   deleteMember: (id) => api(`/admin/members/${id}`, { method: 'DELETE' }),
   getGroups: () => api('/admin/groups'),
   deleteGroup: (id) => api(`/admin/groups/${id}`, { method: 'DELETE' }),
+  runQuery: (sql) => api('/admin/query', { method: 'POST', body: { query: sql } }),
 };
 
 // Settings
