@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 MYSQL_HOST = os.environ.get('MYSQL_HOST', 'localhost')
 MYSQL_USER = os.environ.get('MYSQL_USER', 'root')

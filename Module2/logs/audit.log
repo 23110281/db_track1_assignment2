@@ -97,3 +97,38 @@
 [2026-03-21 20:38:35] [INFO] [USER:laksh_jain] [ACTION:TRANSFER_ADMIN] [ENDPOINT:/api/groups/1/make-admin/2] [IP:127.0.0.1] — Transferred admin of group 1 to member 2
 [2026-03-21 20:38:35] [INFO] [USER:laksh_jain] [ACTION:POST] [ENDPOINT:/api/groups/1/make-admin/2] [IP:127.0.0.1] — POST /api/groups/1/make-admin/2 -> 200
 [2026-03-21 20:38:35] [WARNING] [USER:laksh_jain] [ACTION:POST] [ENDPOINT:/api/groups/1/make-admin/2] [IP:127.0.0.1] — DB audit log failed — POST /api/groups/1/make-admin/2 -> 200
+[2026-03-21 20:47:06] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully
+[2026-03-21 20:47:06] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-21 20:47:06] [WARNING] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — DB audit log failed — POST /api/auth/login -> 200
+[2026-03-21 21:53:49] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully
+[2026-03-21 21:53:49] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-21 21:53:49] [WARNING] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — DB audit log failed — POST /api/auth/login -> 200
+[2026-03-21 22:08:53] [INFO] [USER:ridham.patel@iitgn.ac.in] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'ridham.patel@iitgn.ac.in' logged in successfully
+[2026-03-21 22:08:53] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-21 22:08:53] [WARNING] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — DB audit log failed — POST /api/auth/login -> 200
+[2026-03-21 22:09:25] [INFO] [USER:ridhamp4] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'ridhamp4' logged in successfully
+[2026-03-21 22:09:25] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-21 22:09:25] [WARNING] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — DB audit log failed — POST /api/auth/login -> 200
+[2026-03-21 22:10:12] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully
+[2026-03-21 22:10:12] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-21 22:10:12] [WARNING] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — DB audit log failed — POST /api/auth/login -> 200
+[2026-03-21 22:10:47] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully
+[2026-03-21 22:10:47] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-21 22:10:47] [WARNING] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — DB audit log failed — POST /api/auth/login -> 200
+[2026-03-21 22:14:20] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully
+[2026-03-21 22:14:20] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-21 22:14:20] [WARNING] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — DB audit log failed — POST /api/auth/login -> 200
+[2026-03-21 22:19:59] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 401
+[2026-03-21 22:20:07] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 401
+[2026-03-21 22:20:29] [INFO] [USER:anonymous] [ACTION:SEND_OTP] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — OTP sent to ridham.patel@iitgn.ac.in
+[2026-03-21 22:20:29] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/send-otp] [IP:127.0.0.1] — POST /api/auth/send-otp -> 200
+[2026-03-21 22:20:47] [INFO] [USER:anonymous] [ACTION:VERIFY_OTP] [ENDPOINT:/api/auth/verify-otp] [IP:127.0.0.1] — Email ridham.patel@iitgn.ac.in verified successfully
+[2026-03-21 22:20:47] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/verify-otp] [IP:127.0.0.1] — POST /api/auth/verify-otp -> 200
+[2026-03-21 22:21:06] [INFO] [USER:ridhamp4] [ACTION:REGISTER] [ENDPOINT:/api/auth/register] [IP:127.0.0.1] — New Student registered: 'ridhamp4' (ID: 12)
+[2026-03-21 22:21:06] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/register] [IP:127.0.0.1] — POST /api/auth/register -> 201
+[2026-03-21 22:21:18] [INFO] [USER:ridhamp4] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'ridhamp4' logged in successfully
+[2026-03-21 22:21:18] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — POST /api/auth/login -> 200
+[2026-03-21 22:21:38] [INFO] [USER:ridhamp4] [ACTION:FORGOT_PASSWORD] [ENDPOINT:/api/auth/forgot-password] [IP:127.0.0.1] — Password reset OTP sent to ridham.patel@iitgn.ac.in
+[2026-03-21 22:21:38] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/forgot-password] [IP:127.0.0.1] — POST /api/auth/forgot-password -> 200
+[2026-03-21 22:22:07] [INFO] [USER:ridhamp4] [ACTION:RESET_PASSWORD] [ENDPOINT:/api/auth/reset-password] [IP:127.0.0.1] — Password reset for ridham.patel@iitgn.ac.in
+[2026-03-21 22:22:07] [INFO] [USER:anonymous] [ACTION:POST] [ENDPOINT:/api/auth/reset-password] [IP:127.0.0.1] — POST /api/auth/reset-password -> 200

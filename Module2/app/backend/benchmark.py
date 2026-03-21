@@ -177,7 +177,7 @@ QUERIES = [
 # ---------------------------------------------------------------------------
 # Index definitions  --  parsed from sql/indexes.sql
 # ---------------------------------------------------------------------------
-INDEX_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sql", "indexes.sql")
+INDEX_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "sql", "indexes.sql")
 
 
 def _parse_index_statements(filepath):
