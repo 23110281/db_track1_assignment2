@@ -336,13 +336,3 @@ View the full optimization report in `report.ipynb` (Jupyter Notebook).
 | OTP email not received | Check SMTP credentials in `.env`, ensure Gmail App Password is correct |
 | `seed.py` fails | Ensure MySQL is running and credentials are correct |
 
----
-
-## Team
-
-- Parthiv Patel
-- Shriniket Behera
-- Ridham Patel
-
-**Course:** CS 432 — Databases (Semester II, 2025-2026)
-**Institute:** Indian Institute of Technology, Gandhinagar
