@@ -7,8 +7,8 @@
 
 | Module | YouTube Link |
 |--------|-------------|
-| Module A | [INSERT-MODULE-A-VIDEO-URL-HERE](INSERT-MODULE-A-VIDEO-URL-HERE) |
-| Module B | [INSERT-MODULE-B-VIDEO-URL-HERE](INSERT-MODULE-B-VIDEO-URL-HERE) |
+| Module A | [MODULE-A-VIDEO-URL-HERE](INSERT-MODULE-A-VIDEO-URL-HERE) |
+| Module B | [Video Demonstration Link](https://www.youtube.com/watch?v=QTxnMOmavAc) | 
 
 ## Team Members
 
