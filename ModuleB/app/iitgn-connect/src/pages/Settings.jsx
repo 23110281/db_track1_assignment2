@@ -326,6 +326,17 @@ export default function Settings() {
     showEmail: true, showContact: false, allowQnA: true,
   });
 
+  /* Load privacy settings from backend */
+  useEffect(() => {
+    settingsApi.getPrivacy().then(data => {
+      setPrivacy({
+        showEmail: data.showEmail,
+        showContact: data.showContact,
+        allowQnA: data.allowQnA,
+      });
+    }).catch(() => {});
+  }, []);
+
   /* Toast + Delete modal */
   const [toast, setToast] = useState('');
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 2500); };
@@ -644,7 +655,12 @@ export default function Settings() {
               <div style={s.toggleLabel}>{label}</div>
               <div style={s.toggleDesc}>{desc}</div>
             </div>
-            <Toggle checked={privacy[key]} onChange={(v) => setPrivacy((p) => ({ ...p, [key]: v }))} />
+            <Toggle checked={privacy[key]} onChange={(v) => {
+              setPrivacy((p) => ({ ...p, [key]: v }));
+              settingsApi.updatePrivacy({ [key]: v }).then(() => {
+                showToast('Privacy setting updated!');
+              }).catch(() => showToast('Failed to update privacy setting.'));
+            }} />
           </div>
         ))}
       </div>

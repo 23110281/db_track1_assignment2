@@ -293,14 +293,18 @@ export default function Profile() {
 
         {/* Basic info grid */}
         <div style={s.infoGrid}>
-          <div style={s.infoItem}>
-            <div style={s.iconWrap}><Mail size={16} /></div>
-            <span>{profile.Email}</span>
-          </div>
-          <div style={s.infoItem}>
-            <div style={s.iconWrap}><Phone size={16} /></div>
-            <span>{profile.ContactNumber}</span>
-          </div>
+          {profile.Email && (
+            <div style={s.infoItem}>
+              <div style={s.iconWrap}><Mail size={16} /></div>
+              <span>{profile.Email}</span>
+            </div>
+          )}
+          {profile.ContactNumber && (
+            <div style={s.infoItem}>
+              <div style={s.iconWrap}><Phone size={16} /></div>
+              <span>{profile.ContactNumber}</span>
+            </div>
+          )}
           <div style={s.infoItem}>
             <div style={s.iconWrap}><Calendar size={16} /></div>
             <span>Joined {formatDate(profile.CreatedAt)}</span>
@@ -400,7 +404,7 @@ export default function Profile() {
       </div>
 
       {/* Profile QnA Section */}
-      {(claims.length > 0 || isOwnProfile) && (
+      {(profile.AllowQnA !== false || isOwnProfile) && (claims.length > 0 || isOwnProfile) && (
         <div style={s.section}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <h2 style={{ ...s.sectionTitle, margin: 0 }}>

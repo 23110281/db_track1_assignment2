@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 const PRIMARY = '#4F46E5';
 
 const typeBadge = {
+  Admin: { bg: '#FEF2F2', color: '#DC2626' },
   Student: { bg: '#EEF2FF', color: '#4F46E5' },
   Professor: { bg: '#ECFEFF', color: '#0891B2' },
   Alumni: { bg: '#F0FDF4', color: '#65A30D' },
@@ -198,15 +199,17 @@ export default function Admin() {
                     <td style={{ ...s.td, fontWeight: 600 }}>{m.Name}</td>
                     <td style={s.td}>@{m.Username}</td>
                     <td style={{ ...s.td, fontSize: 13 }}>{m.Email}</td>
-                    <td style={s.td}><span style={s.badge(m.MemberType)}>{m.MemberType}</span></td>
+                    <td style={s.td}><span style={s.badge(m.isAdmin ? 'Admin' : m.MemberType)}>{m.isAdmin ? 'Admin' : m.MemberType}</span></td>
                     <td style={{ ...s.td, fontSize: 13 }}>{m.CreatedAt}</td>
                     <td style={s.td}>
                       <button style={s.btnEdit} onClick={() => handleEditRole(m.MemberID)}>
                         <Edit3 size={12} /> Edit
                       </button>
-                      <button style={s.btnDanger} onClick={() => handleDeleteMember(m.MemberID)}>
-                        <Trash2 size={12} /> Delete
-                      </button>
+                      {m.MemberID !== user?.MemberID && (
+                        <button style={s.btnDanger} onClick={() => handleDeleteMember(m.MemberID)}>
+                          <Trash2 size={12} /> Delete
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

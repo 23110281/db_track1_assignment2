@@ -99,6 +99,9 @@ export default function Jobs() {
   const [editJobForm, setEditJobForm] = useState({ title: '', company: '', description: '', link: '' });
 
   const isAlumni = user?.MemberType === 'Alumni';
+  const isStudent = user?.MemberType === 'Student';
+  const isAdmin = user?.isAdmin;
+  const [sentReferrals, setSentReferrals] = useState({}); // { alumniId: true }
 
   const fetchJobs = useCallback(async () => {
     try {
@@ -111,11 +114,18 @@ export default function Jobs() {
     try {
       const data = await jobsApi.getReferrals();
       setRefRequests(data);
+      // Track which referrals the student has already sent (by alumni ID)
+      if (isStudent && user) {
+        const sent = {};
+        data.filter(r => r.StudentID === user.MemberID).forEach(r => {
+          sent[`${r.TargetAlumniID}`] = true;
+        });
+        setSentReferrals(sent);
+      }
     } catch (err) { console.error('Failed to fetch referrals:', err); }
-  }, []);
+  }, [isStudent, user]);
 
-  useEffect(() => { fetchJobs(); }, [fetchJobs]);
-  useEffect(() => { if (activeTab === 'referrals' || activeTab === 'myJobs') fetchReferrals(); }, [activeTab, fetchReferrals]);
+  useEffect(() => { fetchJobs(); fetchReferrals(); }, [fetchJobs, fetchReferrals]);
 
   const myReferrals = refRequests.filter(r => r.StudentID === user?.MemberID);
   const incomingReferrals = isAlumni ? refRequests.filter(r => r.TargetAlumniID === user?.MemberID) : [];
@@ -189,9 +199,11 @@ export default function Jobs() {
         <button style={styles.tab(activeTab === 'postings')} onClick={() => setActiveTab('postings')}>
           Job Postings
         </button>
-        <button style={styles.tab(activeTab === 'referrals')} onClick={() => setActiveTab('referrals')}>
-          {isAlumni ? 'Referral Requests' : 'My Referrals'}
-        </button>
+        {(isAlumni || isStudent) && !isAdmin && (
+          <button style={styles.tab(activeTab === 'referrals')} onClick={() => setActiveTab('referrals')}>
+            {isAlumni ? 'Referral Requests' : 'My Referrals'}
+          </button>
+        )}
         {isAlumni && (
           <button style={styles.tab(activeTab === 'myJobs')} onClick={() => setActiveTab('myJobs')}>
             My Posted Jobs
@@ -317,7 +329,7 @@ export default function Jobs() {
                       {job.Company}
                     </div>
                   </div>
-                  {isOwnJob && (
+                  {(isOwnJob || isAdmin) && (
                     <div style={{ position: 'relative', flexShrink: 0, marginLeft: 12 }}>
                       <button
                         onClick={() => setJobMenuOpenId(jobMenuOpenId === job.JobID ? null : job.JobID)}
@@ -336,18 +348,20 @@ export default function Jobs() {
                           background: '#fff', borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
                           border: '1px solid #e5e7eb', overflow: 'hidden', minWidth: 140,
                         }}>
-                          <button
-                            onClick={() => startEditJob(job)}
-                            style={{
-                              display: 'flex', alignItems: 'center', gap: 8, width: '100%',
-                              padding: '10px 14px', border: 'none', background: '#fff',
-                              fontSize: 13, fontWeight: 500, color: '#374151', cursor: 'pointer', textAlign: 'left',
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.background = '#F9FAFB'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
-                          >
-                            <Pencil size={14} /> Edit
-                          </button>
+                          {isOwnJob && (
+                            <button
+                              onClick={() => startEditJob(job)}
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                                padding: '10px 14px', border: 'none', background: '#fff',
+                                fontSize: 13, fontWeight: 500, color: '#374151', cursor: 'pointer', textAlign: 'left',
+                              }}
+                              onMouseEnter={e => { e.currentTarget.style.background = '#F9FAFB'; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
+                            >
+                              <Pencil size={14} /> Edit
+                            </button>
+                          )}
                           <button
                             onClick={() => handleDeleteJob(job.JobID)}
                             style={{
@@ -379,15 +393,41 @@ export default function Jobs() {
                   )}
                 </div>
                 <div style={styles.btnRow}>
-                  <a href={job.ApplicationLink} target="_blank" rel="noopener noreferrer" style={styles.btnPrimary}>
-                    <ExternalLink size={14} />
-                    Apply
-                  </a>
-                  {!isAlumni && (
-                    <button style={styles.btnOutline} onClick={() => alert('Referral request sent!')}>
-                      <Send size={14} />
-                      Request Referral
-                    </button>
+                  {!isAdmin && (
+                    <a href={job.ApplicationLink} target="_blank" rel="noopener noreferrer" style={styles.btnPrimary}>
+                      <ExternalLink size={14} />
+                      Apply
+                    </a>
+                  )}
+                  {isStudent && !isAdmin && job.AlumniID && (
+                    sentReferrals[`${job.AlumniID}`] ? (
+                      <button
+                        style={{ ...styles.btnOutline, borderColor: '#059669', color: '#059669', cursor: 'default', opacity: 0.8 }}
+                        disabled
+                      >
+                        <Check size={14} />
+                        Referral Sent!
+                      </button>
+                    ) : (
+                      <button
+                        style={styles.btnOutline}
+                        onClick={async () => {
+                          try {
+                            await jobsApi.createReferral({
+                              targetAlumniId: job.AlumniID,
+                              targetCompany: job.Company,
+                              targetRole: job.Title,
+                            });
+                            setSentReferrals(prev => ({ ...prev, [`${job.AlumniID}`]: true }));
+                          } catch (err) {
+                            console.error('Failed to send referral:', err);
+                          }
+                        }}
+                      >
+                        <Send size={14} />
+                        Request Referral
+                      </button>
+                    )
                   )}
                 </div>
               </div>

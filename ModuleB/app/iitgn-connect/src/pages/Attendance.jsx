@@ -63,6 +63,7 @@ const s = {
 
 export default function Attendance() {
   const { user } = useAuth();
+  const isAdmin = user?.isAdmin;
   const sid = user?.MemberID || 1;
 
   const [classStreak, setClassStreak] = useState(0);
@@ -138,90 +139,94 @@ export default function Attendance() {
         </div>
       </div>
 
-      {/* Class Attendance */}
-      <div style={s.section}>
-        <h2 style={s.sectionTitle}><BookOpen size={20} color={PRIMARY} /> Class Attendance</h2>
-        <div style={s.streakBox}>
-          <span style={{ fontSize: 40 }}>&#128293;</span>
-          <div>
-            <div style={s.streakNum}>{classStreak}</div>
-            <div style={s.streakLabel}>Day Class Streak</div>
-          </div>
-        </div>
-
-        <div style={s.card}>
-          <h3 style={{ fontSize: 15, fontWeight: 600, color: '#1E1B4B', marginBottom: 12 }}>March 2026</h3>
-          <div style={s.calGrid}>
-            {dayNames.map(d => <div key={d} style={s.dayLabel}>{d}</div>)}
-            {Array.from({ length: firstDayOfWeek }).map((_, i) => <div key={'e' + i} />)}
-            {Array.from({ length: daysInMonth }).map((_, i) => {
-              const day = i + 1;
-              const status = day <= 20 ? (dayStatusMap[day] || 'none') : 'none';
-              return (
-                <div key={day} style={s.dayCell(status)}>
-                  {day}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div style={{ ...s.card, padding: 0, overflow: 'hidden' }}>
-          <table style={s.table}>
-            <thead>
-              <tr>
-                <th style={s.th}>Course</th>
-                <th style={s.th}>Code</th>
-                <th style={s.th}>Present / Total</th>
-                <th style={s.th}>Percentage</th>
-              </tr>
-            </thead>
-            <tbody>
-              {courseBreakdown.map((cb, idx) => (
-                <tr key={cb.course?.CourseID || idx}>
-                  <td style={s.td}>{cb.course?.CourseName}</td>
-                  <td style={s.td}>{cb.course?.CourseCode}</td>
-                  <td style={s.td}>{cb.present} / {cb.total}</td>
-                  <td style={{ ...s.td, width: 200 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={s.progressBg}>
-                        <div style={s.progressFill(cb.pct, cb.pct >= 75 ? '#059669' : '#DC2626')} />
-                      </div>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: cb.pct >= 75 ? '#059669' : '#DC2626' }}>{cb.pct}%</span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Mess Attendance */}
-      <div style={s.section}>
-        <h2 style={s.sectionTitle}><UtensilsCrossed size={20} color={PRIMARY} /> Mess Attendance</h2>
-        <div style={s.streakBox}>
-          <span style={{ fontSize: 40 }}>&#128293;</span>
-          <div>
-            <div style={s.streakNum}>{messStreak}</div>
-            <div style={s.streakLabel}>Meal Streak</div>
-          </div>
-        </div>
-
-        <div style={s.mealGrid}>
-          {mealStats.map(ms => (
-            <div key={ms.meal} style={s.mealCard}>
-              <div style={s.mealTitle}>{ms.meal}</div>
-              <div style={s.mealStat}>{ms.eaten}<span style={{ fontSize: 14, fontWeight: 500, color: '#9CA3AF' }}> / {ms.total}</span></div>
-              <div style={s.mealSub}>{ms.missed} missed</div>
-              <div style={{ ...s.progressBg, marginTop: 10 }}>
-                <div style={s.progressFill(ms.pct, mealColors[ms.meal])} />
-              </div>
-              <div style={{ textAlign: 'right', fontSize: 12, fontWeight: 700, color: mealColors[ms.meal], marginTop: 4 }}>{ms.pct}%</div>
+      {/* Class Attendance (hidden for admin) */}
+      {!isAdmin && (
+        <div style={s.section}>
+          <h2 style={s.sectionTitle}><BookOpen size={20} color={PRIMARY} /> Class Attendance</h2>
+          <div style={s.streakBox}>
+            <span style={{ fontSize: 40 }}>&#128293;</span>
+            <div>
+              <div style={s.streakNum}>{classStreak}</div>
+              <div style={s.streakLabel}>Day Class Streak</div>
             </div>
-          ))}
+          </div>
+
+          <div style={s.card}>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: '#1E1B4B', marginBottom: 12 }}>March 2026</h3>
+            <div style={s.calGrid}>
+              {dayNames.map(d => <div key={d} style={s.dayLabel}>{d}</div>)}
+              {Array.from({ length: firstDayOfWeek }).map((_, i) => <div key={'e' + i} />)}
+              {Array.from({ length: daysInMonth }).map((_, i) => {
+                const day = i + 1;
+                const status = day <= 20 ? (dayStatusMap[day] || 'none') : 'none';
+                return (
+                  <div key={day} style={s.dayCell(status)}>
+                    {day}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div style={{ ...s.card, padding: 0, overflow: 'hidden' }}>
+            <table style={s.table}>
+              <thead>
+                <tr>
+                  <th style={s.th}>Course</th>
+                  <th style={s.th}>Code</th>
+                  <th style={s.th}>Present / Total</th>
+                  <th style={s.th}>Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {courseBreakdown.map((cb, idx) => (
+                  <tr key={cb.course?.CourseID || idx}>
+                    <td style={s.td}>{cb.course?.CourseName}</td>
+                    <td style={s.td}>{cb.course?.CourseCode}</td>
+                    <td style={s.td}>{cb.present} / {cb.total}</td>
+                    <td style={{ ...s.td, width: 200 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={s.progressBg}>
+                          <div style={s.progressFill(cb.pct, cb.pct >= 75 ? '#059669' : '#DC2626')} />
+                        </div>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: cb.pct >= 75 ? '#059669' : '#DC2626' }}>{cb.pct}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Mess Attendance (hidden for admin) */}
+      {!isAdmin && (
+        <div style={s.section}>
+          <h2 style={s.sectionTitle}><UtensilsCrossed size={20} color={PRIMARY} /> Mess Attendance</h2>
+          <div style={s.streakBox}>
+            <span style={{ fontSize: 40 }}>&#128293;</span>
+            <div>
+              <div style={s.streakNum}>{messStreak}</div>
+              <div style={s.streakLabel}>Meal Streak</div>
+            </div>
+          </div>
+
+          <div style={s.mealGrid}>
+            {mealStats.map(ms => (
+              <div key={ms.meal} style={s.mealCard}>
+                <div style={s.mealTitle}>{ms.meal}</div>
+                <div style={s.mealStat}>{ms.eaten}<span style={{ fontSize: 14, fontWeight: 500, color: '#9CA3AF' }}> / {ms.total}</span></div>
+                <div style={s.mealSub}>{ms.missed} missed</div>
+                <div style={{ ...s.progressBg, marginTop: 10 }}>
+                  <div style={s.progressFill(ms.pct, mealColors[ms.meal])} />
+                </div>
+                <div style={{ textAlign: 'right', fontSize: 12, fontWeight: 700, color: mealColors[ms.meal], marginTop: 4 }}>{ms.pct}%</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Leaderboards */}
       <div style={s.section}>

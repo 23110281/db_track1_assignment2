@@ -90,7 +90,9 @@ def delete_job(job_id):
     job = query_db("SELECT * FROM JobPost WHERE JobID = %s", (job_id,), one=True)
     if not job:
         return jsonify(error='Job not found'), 404
-    if job['AlumniID'] != user_id:
+    member = query_db("SELECT IsAdmin FROM Member WHERE MemberID = %s", (user_id,), one=True)
+    is_admin = member and member['IsAdmin']
+    if job['AlumniID'] != user_id and not is_admin:
         return jsonify(error='Unauthorized'), 403
 
     execute_db("DELETE FROM JobPost WHERE JobID = %s", (job_id,))

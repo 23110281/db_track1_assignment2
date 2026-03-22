@@ -28,7 +28,51 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10 MB max
 
 CORS(app, origins=['http://localhost:5173', 'http://127.0.0.1:5173'])
-JWTManager(app)
+jwt = JWTManager(app)
+
+
+# --- JWT error handlers: log unauthorized API access to audit.log ---
+@jwt.unauthorized_loader
+def handle_missing_token(reason):
+    log_action('UNAUTHORIZED_ACCESS', f"Missing/invalid JWT on {flask_request.method} {flask_request.path} — {reason}", user='UNAUTHORIZED')
+    log_to_db(
+        username='UNAUTHORIZED',
+        action='MISSING_TOKEN',
+        endpoint=flask_request.path,
+        ip=flask_request.remote_addr or '127.0.0.1',
+        details=f"No valid JWT provided: {reason}",
+        is_authorized=False,
+    )
+    return {'error': 'Authorization token is missing or invalid'}, 401
+
+
+@jwt.expired_token_loader
+def handle_expired_token(jwt_header, jwt_payload):
+    user = jwt_payload.get('sub', 'unknown')
+    log_action('UNAUTHORIZED_ACCESS', f"Expired JWT (user_id={user}) on {flask_request.method} {flask_request.path}", user='EXPIRED_TOKEN')
+    log_to_db(
+        username=f'uid:{user}',
+        action='EXPIRED_TOKEN',
+        endpoint=flask_request.path,
+        ip=flask_request.remote_addr or '127.0.0.1',
+        details=f"Expired JWT token for user_id={user}",
+        is_authorized=False,
+    )
+    return {'error': 'Token has expired, please login again'}, 401
+
+
+@jwt.invalid_token_loader
+def handle_invalid_token(reason):
+    log_action('UNAUTHORIZED_ACCESS', f"Invalid/tampered JWT on {flask_request.method} {flask_request.path} — {reason}", user='INVALID_TOKEN')
+    log_to_db(
+        username='INVALID_TOKEN',
+        action='INVALID_TOKEN',
+        endpoint=flask_request.path,
+        ip=flask_request.remote_addr or '127.0.0.1',
+        details=f"Invalid/tampered JWT: {reason}",
+        is_authorized=False,
+    )
+    return {'error': 'Token is invalid'}, 401
 
 # Register blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
@@ -44,9 +88,19 @@ app.register_blueprint(settings_bp, url_prefix='/api/settings')
 
 
 # --- Audit logging: log all data-modifying requests ---
+# These auth endpoints already log with the actual username inside their route handlers,
+# so we skip them here to avoid duplicate "anonymous" log entries.
+SELF_LOGGED_ENDPOINTS = {
+    '/api/auth/login', '/api/auth/register', '/api/auth/send-otp',
+    '/api/auth/verify-otp', '/api/auth/forgot-password', '/api/auth/reset-password',
+}
+
 @app.after_request
 def audit_log_request(response):
     if flask_request.method in ('POST', 'PUT', 'DELETE'):
+        # Skip endpoints that already handle their own audit logging
+        if flask_request.path in SELF_LOGGED_ENDPOINTS:
+            return response
         username = 'anonymous'
         try:
             username = get_current_username()

@@ -1,8 +1,9 @@
 from functools import wraps
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from db import query_db, execute_db
-from audit import log_action, get_current_username
+import traceback
+from db import query_db, execute_db, get_db
+from audit import log_action, log_to_db, get_current_username
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -12,8 +13,18 @@ def admin_required(fn):
     @jwt_required()
     def wrapper(*args, **kwargs):
         user_id = int(get_jwt_identity())
-        member = query_db("SELECT IsAdmin FROM Member WHERE MemberID = %s", (user_id,), one=True)
+        member = query_db("SELECT IsAdmin, Username FROM Member WHERE MemberID = %s", (user_id,), one=True)
         if not member or not member['IsAdmin']:
+            username = member['Username'] if member else f'uid:{user_id}'
+            log_action('FORBIDDEN_ACCESS', f"Non-admin user '{username}' attempted {request.method} {request.path}", user=username)
+            log_to_db(
+                username=username,
+                action='FORBIDDEN_ACCESS',
+                endpoint=request.path,
+                ip=request.remote_addr or '127.0.0.1',
+                details=f"Non-admin user '{username}' tried to access admin endpoint {request.path}",
+                is_authorized=False,
+            )
             return jsonify(error='Admin access required'), 403
         return fn(*args, **kwargs)
     return wrapper
@@ -136,3 +147,40 @@ def delete_group(group_id):
     execute_db("DELETE FROM CampusGroup WHERE GroupID = %s", (group_id,))
     log_action('ADMIN_DELETE_GROUP', f"Admin deleted group {group_id}", user=get_current_username())
     return jsonify(message='Group deleted')
+
+
+@admin_bp.route('/query', methods=['POST'])
+@admin_required
+def run_query():
+    data = request.get_json()
+    sql = (data.get('query') or '').strip()
+    if not sql:
+        return jsonify(error='Query is required'), 400
+
+    username = get_current_username()
+    log_action('ADMIN_SQL_QUERY', f"Admin executed SQL: {sql[:500]}", user=username)
+
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(sql)
+
+        # Determine if this is a SELECT-type query
+        if cursor.description:
+            rows = cursor.fetchall()
+            # Convert non-serializable types to strings
+            for row in rows:
+                for key, val in row.items():
+                    if not isinstance(val, (str, int, float, bool, type(None))):
+                        row[key] = str(val)
+            cursor.close()
+            conn.close()
+            return jsonify(type='select', rows=rows, rowCount=len(rows))
+        else:
+            affected = cursor.rowcount
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return jsonify(type='modify', affectedRows=affected)
+    except Exception as e:
+        return jsonify(error=str(e)), 400

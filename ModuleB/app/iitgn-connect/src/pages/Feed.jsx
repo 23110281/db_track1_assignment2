@@ -125,8 +125,8 @@ export default function Feed() {
         </button>
       </div>
 
-      {/* Create Post */}
-      {user && <CreatePost user={user} onPost={handleNewPost} />}
+      {/* Create Post — only on Global Feed (group posts are made from within the group) */}
+      {user && activeTab === 'global' && <CreatePost user={user} onPost={handleNewPost} />}
 
       {/* Feed Items */}
       {!loading && feedItems.length === 0 ? (

@@ -31,12 +31,9 @@ const styles = {
     marginBottom: '0.5rem',
   },
   logoIcon: {
-    background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
-    borderRadius: '0.75rem',
-    padding: '0.6rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 48,
+    height: 48,
+    objectFit: 'contain',
   },
   logoText: {
     fontSize: '1.6rem',
@@ -213,9 +210,7 @@ export default function Login() {
     <div style={styles.wrapper}>
       <div style={styles.card}>
         <div style={styles.logoContainer}>
-          <div style={styles.logoIcon}>
-            <GraduationCap size={28} color="#ffffff" />
-          </div>
+          <img src="/logo.png" alt="IITGN Connect" style={styles.logoIcon} />
           <span style={styles.logoText}>IITGN Connect</span>
         </div>
         <p style={styles.subtitle}>Sign in to your campus community</p>

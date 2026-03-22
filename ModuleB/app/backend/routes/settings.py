@@ -109,6 +109,47 @@ def change_username():
     return jsonify(message='Username changed successfully', username=new_username)
 
 
+@settings_bp.route('/privacy', methods=['GET'])
+@jwt_required()
+def get_privacy():
+    user_id = int(get_jwt_identity())
+    member = query_db("SELECT ShowEmail, ShowContact, AllowQnA FROM Member WHERE MemberID = %s", (user_id,), one=True)
+    if not member:
+        return jsonify(error='User not found'), 404
+    return jsonify(
+        showEmail=bool(member['ShowEmail']),
+        showContact=bool(member['ShowContact']),
+        allowQnA=bool(member['AllowQnA']),
+    )
+
+
+@settings_bp.route('/privacy', methods=['PUT'])
+@jwt_required()
+def update_privacy():
+    user_id = int(get_jwt_identity())
+    data = request.get_json()
+
+    updates = []
+    args = []
+    field_map = {
+        'showEmail': 'ShowEmail',
+        'showContact': 'ShowContact',
+        'allowQnA': 'AllowQnA',
+    }
+    for key, col in field_map.items():
+        if key in data:
+            updates.append(f"{col} = %s")
+            args.append(bool(data[key]))
+
+    if not updates:
+        return jsonify(error='No fields to update'), 400
+
+    args.append(user_id)
+    execute_db(f"UPDATE Member SET {', '.join(updates)} WHERE MemberID = %s", tuple(args))
+    log_action('UPDATE_PRIVACY', f"Updated privacy settings: {', '.join(u.split(' =')[0] for u in updates)}", user=get_current_username())
+    return jsonify(message='Privacy settings updated')
+
+
 @settings_bp.route('/account', methods=['DELETE'])
 @jwt_required()
 def delete_account():

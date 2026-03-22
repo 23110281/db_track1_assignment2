@@ -8,6 +8,7 @@ import {
   Flame,
   Contact,
   ShieldCheck,
+  Terminal,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -80,7 +81,12 @@ export default function Sidebar() {
 
       {/* Navigation Links */}
       <nav style={styles.nav}>
-        {navItems.map((item) => {
+        {navItems.filter(item => {
+          // Hide Jobs for Professors and Organizations
+          if (item.path === '/jobs' && (memberType === 'Professor' || memberType === 'Organization')) return false;
+          if (item.path === '/attendance' && (memberType === 'Alumni' || memberType === 'Professor')) return false;
+          return true;
+        }).map((item) => {
           const active = isActive(item.path);
           const Icon = item.icon;
           const dest = item.path === '/profile' ? `/profile/${user?.MemberID}` : item.path;
@@ -131,6 +137,26 @@ export default function Sidebar() {
             >
               <ShieldCheck size={20} color={isActive('/admin') ? '#4F46E5' : '#9CA3AF'} />
               <span>Admin Dashboard</span>
+            </div>
+            <div
+              style={{
+                ...styles.navItem,
+                backgroundColor: isActive('/query-console') ? '#EEF2FF' : 'transparent',
+                color: isActive('/query-console') ? '#4F46E5' : '#4B5563',
+                fontWeight: isActive('/query-console') ? 600 : 400,
+              }}
+              onClick={() => navigate('/query-console')}
+              onMouseEnter={(e) => {
+                if (!isActive('/query-console')) e.currentTarget.style.backgroundColor = '#F9FAFB';
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive('/query-console')) e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+              role="button"
+              tabIndex={0}
+            >
+              <Terminal size={20} color={isActive('/query-console') ? '#4F46E5' : '#9CA3AF'} />
+              <span>SQL Console</span>
             </div>
           </>
         )}

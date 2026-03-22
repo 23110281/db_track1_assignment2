@@ -39,7 +39,7 @@ export default function Navbar() {
     <nav style={styles.navbar}>
       {/* Logo */}
       <div style={styles.logoSection} onClick={() => navigate('/')} role="button" tabIndex={0}>
-        <div style={styles.logoIcon}>IC</div>
+        <img src="/logo.png" alt="IITGN Connect" style={styles.logoIcon} />
         <span style={styles.logoText}>IITGN Connect</span>
       </div>
 
@@ -51,6 +51,12 @@ export default function Navbar() {
           placeholder="Search people, groups, posts..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && searchQuery.trim()) {
+              navigate(`/members?q=${encodeURIComponent(searchQuery.trim())}`);
+              setSearchQuery('');
+            }
+          }}
           style={styles.searchInput}
         />
       </div>
@@ -157,14 +163,7 @@ const styles = {
     width: 36,
     height: 36,
     borderRadius: 8,
-    backgroundColor: '#4F46E5',
-    color: '#FFFFFF',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontWeight: 700,
-    fontSize: 14,
-    letterSpacing: 1,
+    objectFit: 'contain',
   },
   logoText: {
     fontSize: 18,

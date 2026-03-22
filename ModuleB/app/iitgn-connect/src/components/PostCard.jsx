@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Heart, MessageCircle, Users, Send, MoreVertical, Pencil, Trash2, X, Check } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { postsApi } from '../api';
@@ -235,9 +236,12 @@ function formatTime(dateStr) {
 
 export default function PostCard({ post, onPostUpdated, onPostDeleted }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const author = post.author;
   const groupName = post.groupName;
+  const groupId = post.GroupID;
   const isOwnPost = user && author && user.MemberID === author.MemberID;
+  const isAdmin = user?.isAdmin;
 
   const [liked, setLiked] = useState(post.liked || false);
   const [likeCount, setLikeCount] = useState(post.likes || 0);
@@ -374,7 +378,7 @@ export default function PostCard({ post, onPostUpdated, onPostDeleted }) {
             </div>
           </div>
         </div>
-        {isOwnPost && (
+        {(isOwnPost || isAdmin) && (
           <div style={{ position: 'relative' }}>
             <button
               onClick={() => setPostMenuOpen(!postMenuOpen)}
@@ -393,18 +397,20 @@ export default function PostCard({ post, onPostUpdated, onPostDeleted }) {
                 background: '#fff', borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
                 border: '1px solid #e5e7eb', overflow: 'hidden', minWidth: 130,
               }}>
-                <button
-                  onClick={() => { setEditingPost(true); setEditPostText(post.Content || ''); setPostMenuOpen(false); }}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 8, width: '100%',
-                    padding: '10px 14px', border: 'none', background: '#fff',
-                    fontSize: 13, fontWeight: 500, color: '#374151', cursor: 'pointer', textAlign: 'left',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = '#F9FAFB'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
-                >
-                  <Pencil size={14} /> Edit
-                </button>
+                {isOwnPost && (
+                  <button
+                    onClick={() => { setEditingPost(true); setEditPostText(post.Content || ''); setPostMenuOpen(false); }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                      padding: '10px 14px', border: 'none', background: '#fff',
+                      fontSize: 13, fontWeight: 500, color: '#374151', cursor: 'pointer', textAlign: 'left',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#F9FAFB'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
+                  >
+                    <Pencil size={14} /> Edit
+                  </button>
+                )}
                 <button
                   onClick={() => { handleDeletePost(); setPostMenuOpen(false); }}
                   style={{
@@ -425,7 +431,11 @@ export default function PostCard({ post, onPostUpdated, onPostDeleted }) {
 
       {groupName && (
         <div style={{ marginBottom: 12 }}>
-          <span style={styles.groupBadge}>
+          <span
+            style={{ ...styles.groupBadge, cursor: 'pointer' }}
+            onClick={() => groupId && navigate(`/groups/${groupId}`)}
+            title={`Open ${groupName}`}
+          >
             <Users size={12} />
             {groupName}
           </span>
@@ -570,7 +580,7 @@ export default function PostCard({ post, onPostUpdated, onPostDeleted }) {
                         </span>
                         <span style={styles.commentTime}>{formatTime(comment.CreatedAt)}</span>
                       </div>
-                      {isOwn && editingId !== comment.CommentID && (
+                      {(isOwn || isAdmin) && editingId !== comment.CommentID && (
                         <div style={{ position: 'relative' }}>
                           <button
                             onClick={() => setMenuOpenId(menuOpenId === comment.CommentID ? null : comment.CommentID)}
@@ -580,14 +590,16 @@ export default function PostCard({ post, onPostUpdated, onPostDeleted }) {
                           </button>
                           {menuOpenId === comment.CommentID && (
                             <div style={styles.dropdownMenu}>
-                              <button
-                                onClick={() => startEditComment(comment)}
-                                style={styles.dropdownItem('#374151')}
-                                onMouseEnter={e => { e.currentTarget.style.background = '#F9FAFB'; }}
-                                onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
-                              >
-                                <Pencil size={13} /> Edit
-                              </button>
+                              {isOwn && (
+                                <button
+                                  onClick={() => startEditComment(comment)}
+                                  style={styles.dropdownItem('#374151')}
+                                  onMouseEnter={e => { e.currentTarget.style.background = '#F9FAFB'; }}
+                                  onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
+                                >
+                                  <Pencil size={13} /> Edit
+                                </button>
+                              )}
                               <button
                                 onClick={() => handleDeleteComment(comment.CommentID)}
                                 style={styles.dropdownItem('#EF4444')}

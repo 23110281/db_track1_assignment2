@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Users, Search, Mail, ArrowRight } from 'lucide-react';
 import { membersApi } from '../api';
 
@@ -73,7 +73,8 @@ const s = {
 
 export default function Members() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get('q') || '');
   const [filter, setFilter] = useState('All');
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -91,6 +92,12 @@ export default function Members() {
       setLoading(false);
     }
   }, [search, filter]);
+
+  // Sync search state when URL query param changes (from navbar search)
+  useEffect(() => {
+    const q = searchParams.get('q') || '';
+    if (q && q !== search) setSearch(q);
+  }, [searchParams]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

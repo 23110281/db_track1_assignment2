@@ -9,22 +9,28 @@ profile_bp = Blueprint('profile', __name__)
 @profile_bp.route('/profile/<int:member_id>', methods=['GET'])
 @jwt_required()
 def get_profile(member_id):
+    viewer_id = int(get_jwt_identity())
     member = query_db("SELECT * FROM Member WHERE MemberID = %s", (member_id,), one=True)
     if not member:
         return jsonify(error='Member not found'), 404
+
+    show_email = bool(member.get('ShowEmail', True))
+    show_contact = bool(member.get('ShowContact', True))
+    allow_qna = bool(member.get('AllowQnA', True))
 
     user = {
         'MemberID': member['MemberID'],
         'Username': member['Username'],
         'Name': member['Name'],
-        'Email': member['Email'],
+        'Email': member['Email'] if show_email else None,
         'MemberType': member['MemberType'],
-        'ContactNumber': member['ContactNumber'],
+        'ContactNumber': member['ContactNumber'] if show_contact else None,
         'CreatedAt': str(member['CreatedAt']),
         'Address': member.get('Address', ''),
         'ShowAddress': bool(member.get('ShowAddress', False)),
         'avatarColor': member['AvatarColor'],
         'isAdmin': bool(member['IsAdmin']),
+        'AllowQnA': allow_qna,
     }
 
     # Subtype details
