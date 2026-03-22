@@ -507,12 +507,111 @@ def cleanup_bulk_data(cursor):
     cursor.execute("DELETE FROM ReferralRequest WHERE TargetCompany LIKE 'Company %'")
 
 
+import re
+
+
 def run_explain(cursor, sql):
     """Run EXPLAIN on a query and return the result rows as list of dicts."""
     cursor.execute("EXPLAIN " + sql)
     columns = [d[0] for d in cursor.description]
     rows = cursor.fetchall()
     return [dict(zip(columns, row)) for row in rows]
+
+
+def run_explain_analyze(cursor, sql):
+    """Run EXPLAIN ANALYZE and return the raw tree text + parsed metrics.
+
+    MySQL 8.0.18+ EXPLAIN ANALYZE returns a tree like:
+      -> Limit: 10 row(s)  (cost=505 rows=10) (actual time=4.24..5.4 rows=10 loops=1)
+          -> Index scan on p using idx_post_createdat  (cost=0.04 rows=10) (actual time=3.81..4.89 rows=10 loops=1)
+    """
+    cursor.execute("EXPLAIN ANALYZE " + sql)
+    raw_rows = cursor.fetchall()
+    # The output comes as a single column with embedded \n
+    tree_text = "\n".join(str(r[0]) for r in raw_rows)
+
+    # Parse each node line
+    nodes = _parse_explain_analyze_tree(tree_text)
+
+    # Extract top-level actual time as total execution time
+    total_time_ms = 0.0
+    if nodes:
+        total_time_ms = nodes[0].get("actual_time_end", 0.0)
+
+    return {
+        "tree_text": tree_text,
+        "nodes": nodes,
+        "total_time_ms": total_time_ms,
+    }
+
+
+def _parse_explain_analyze_tree(tree_text):
+    """Parse EXPLAIN ANALYZE tree output into structured node list."""
+    nodes = []
+    # Match lines like:
+    #   -> Table scan on Member  (cost=25.4 rows=241) (actual time=0.066..0.068 rows=5 loops=1)
+    #   -> Index scan on p using idx_post_createdat  (cost=0.04 rows=10) (actual time=3.8..4.9 rows=10 loops=1)
+    #   -> Sort: p.CreatedAt DESC  (cost=207 rows=2017) (actual time=6.85..6.85 rows=10 loops=1)
+    pattern = re.compile(
+        r'(?P<indent>\s*)->\s*(?P<operation>.+?)'
+        r'\s*\(cost=(?P<cost>[\d.]+)\s+rows=(?P<est_rows>[\d.]+)\)'
+        r'\s*\(actual time=(?P<time_start>[\d.]+)\.\.(?P<time_end>[\d.]+)'
+        r'\s+rows=(?P<actual_rows>[\d.]+)\s+loops=(?P<loops>\d+)\)'
+    )
+
+    for line in tree_text.split('\n'):
+        line = line.rstrip()
+        if not line:
+            continue
+        m = pattern.search(line)
+        if m:
+            operation = m.group('operation').strip()
+            # Determine scan type from operation text
+            scan_type = _classify_scan_type(operation)
+
+            nodes.append({
+                "depth": len(m.group('indent')) // 4,
+                "operation": operation,
+                "scan_type": scan_type,
+                "cost": float(m.group('cost')),
+                "est_rows": float(m.group('est_rows')),
+                "actual_time_start": float(m.group('time_start')),
+                "actual_time_end": float(m.group('time_end')),
+                "actual_rows": float(m.group('actual_rows')),
+                "loops": int(m.group('loops')),
+            })
+    return nodes
+
+
+def _classify_scan_type(operation):
+    """Classify the EXPLAIN ANALYZE operation into a scan type category."""
+    op_lower = operation.lower()
+    if 'table scan' in op_lower:
+        return 'Full Table Scan'
+    elif 'index scan' in op_lower:
+        return 'Full Index Scan'
+    elif 'covering index scan' in op_lower:
+        return 'Covering Index Scan'
+    elif 'covering index lookup' in op_lower:
+        return 'Covering Index Lookup'
+    elif 'index range scan' in op_lower:
+        return 'Index Range Scan'
+    elif 'index lookup' in op_lower:
+        return 'Index Lookup'
+    elif 'single-row index lookup' in op_lower or 'single-row covering index lookup' in op_lower:
+        return 'Unique Lookup'
+    elif 'sort' in op_lower:
+        return 'Sort'
+    elif 'filter' in op_lower:
+        return 'Filter'
+    elif 'aggregate' in op_lower:
+        return 'Aggregate'
+    elif 'nested loop' in op_lower:
+        return 'Nested Loop Join'
+    elif 'limit' in op_lower:
+        return 'Limit'
+    else:
+        return 'Other'
 
 
 def measure_time(cursor, sql, n=NUM_RUNS):
@@ -616,6 +715,19 @@ def format_explain(explain_rows):
     return " | ".join(parts)
 
 
+def format_explain_analyze(ea_result):
+    """Return a compact string summary of EXPLAIN ANALYZE output."""
+    parts = []
+    for node in ea_result.get("nodes", []):
+        op = node["operation"][:50]
+        actual_rows = node["actual_rows"]
+        loops = node["loops"]
+        time_ms = node["actual_time_end"]
+        scan = node["scan_type"]
+        parts.append(f"[{scan}] {op} (rows={actual_rows}, time={time_ms:.3f}ms, loops={loops})")
+    return " | ".join(parts)
+
+
 # ---------------------------------------------------------------------------
 # Main benchmark
 # ---------------------------------------------------------------------------
@@ -661,10 +773,12 @@ def main():
 
         # --- BEFORE: query with IGNORE INDEX hints (simulates no indexes) ---
         explain_before = run_explain(cursor, sql_before)
+        ea_before = run_explain_analyze(cursor, sql_before)
         time_before = measure_time(cursor, sql_before)
 
         # --- AFTER: normal query (uses indexes) ---
         explain_after = run_explain(cursor, sql_after)
+        ea_after = run_explain_analyze(cursor, sql_after)
         time_after = measure_time(cursor, sql_after)
 
         # --- Compute speedup ---
@@ -672,6 +786,12 @@ def main():
             speedup = ((time_before - time_after) / time_before) * 100
         else:
             speedup = 0.0
+
+        # Extract scan types from EXPLAIN ANALYZE
+        scan_types_before = [n["scan_type"] for n in ea_before["nodes"]
+                             if n["scan_type"] not in ("Sort", "Filter", "Aggregate", "Nested Loop Join", "Limit", "Other")]
+        scan_types_after = [n["scan_type"] for n in ea_after["nodes"]
+                            if n["scan_type"] not in ("Sort", "Filter", "Aggregate", "Nested Loop Join", "Limit", "Other")]
 
         result = {
             "name": name,
@@ -683,10 +803,31 @@ def main():
             "explain_after": explain_after,
             "explain_before_summary": format_explain(explain_before),
             "explain_after_summary": format_explain(explain_after),
+            # EXPLAIN ANALYZE data
+            "explain_analyze_before": {
+                "tree_text": ea_before["tree_text"],
+                "total_time_ms": round(ea_before["total_time_ms"], 4),
+                "nodes": ea_before["nodes"],
+            },
+            "explain_analyze_after": {
+                "tree_text": ea_after["tree_text"],
+                "total_time_ms": round(ea_after["total_time_ms"], 4),
+                "nodes": ea_after["nodes"],
+            },
+            "scan_types_before": scan_types_before,
+            "scan_types_after": scan_types_after,
+            "planning_time_before_ms": round(ea_before["total_time_ms"], 4),
+            "execution_time_before_ms": round(time_before, 4),
+            "planning_time_after_ms": round(ea_after["total_time_ms"], 4),
+            "execution_time_after_ms": round(time_after, 4),
         }
         results.append(result)
 
         print(f"  Before: {time_before:.4f} ms  |  After: {time_after:.4f} ms  |  Speedup: {speedup:+.2f}%")
+        print(f"  EXPLAIN ANALYZE before (total): {ea_before['total_time_ms']:.4f} ms")
+        print(f"  EXPLAIN ANALYZE after  (total): {ea_after['total_time_ms']:.4f} ms")
+        print(f"  Scan types before: {scan_types_before}")
+        print(f"  Scan types after:  {scan_types_after}")
         print(f"  EXPLAIN before: {format_explain(explain_before)}")
         print(f"  EXPLAIN after:  {format_explain(explain_after)}")
 
@@ -696,12 +837,16 @@ def main():
     # -----------------------------------------------------------------------
     # Console summary table
     # -----------------------------------------------------------------------
-    print("\n" + "=" * 100)
-    print(f"{'Query':<35} {'Before (ms)':>12} {'After (ms)':>12} {'Speedup':>10}")
-    print("-" * 100)
+    print("\n" + "=" * 120)
+    print(f"{'Query':<30} {'Exec Before':>12} {'Exec After':>12} {'Speedup':>10} {'EA Before':>12} {'EA After':>12} {'Scan Before':<25} {'Scan After':<25}")
+    print("-" * 120)
     for r in results:
-        print(f"{r['name']:<35} {r['time_before_ms']:>12.4f} {r['time_after_ms']:>12.4f} {r['speedup_pct']:>+9.2f}%")
-    print("=" * 100)
+        sb = ", ".join(r.get("scan_types_before", [])[:3]) or "N/A"
+        sa = ", ".join(r.get("scan_types_after", [])[:3]) or "N/A"
+        ea_b = r.get("planning_time_before_ms", 0)
+        ea_a = r.get("planning_time_after_ms", 0)
+        print(f"{r['name']:<30} {r['time_before_ms']:>12.4f} {r['time_after_ms']:>12.4f} {r['speedup_pct']:>+9.2f}% {ea_b:>12.4f} {ea_a:>12.4f} {sb:<25} {sa:<25}")
+    print("=" * 120)
 
     avg_speedup = sum(r["speedup_pct"] for r in results) / len(results) if results else 0
     print(f"Average speedup: {avg_speedup:+.2f}%\n")
@@ -824,6 +969,88 @@ def main():
     fig3.savefig(chart3_path, dpi=150)
     plt.close(fig3)
     print(f"Chart saved: {chart3_path}")
+
+    # --- Chart 4: Scan Type Comparison ---
+    fig4, (ax4a, ax4b) = plt.subplots(1, 2, figsize=(16, 7))
+
+    before_scans = []
+    after_scans = []
+    for r in results:
+        bs = r.get("scan_types_before", [])
+        before_scans.append(", ".join(bs[:3]) if bs else "N/A")
+        ascan = r.get("scan_types_after", [])
+        after_scans.append(", ".join(ascan[:3]) if ascan else "N/A")
+
+    # Color-code: red for table scans, green for index lookups
+    def scan_color(scan_str):
+        if 'Table Scan' in scan_str:
+            return '#FCA5A5'  # red
+        elif 'Index Scan' in scan_str:
+            return '#FDE68A'  # yellow
+        elif 'Lookup' in scan_str:
+            return '#BBF7D0'  # green
+        else:
+            return '#E5E7EB'  # gray
+
+    # Before
+    ax4a.set_title("Scan Types BEFORE Indexing", fontsize=12, fontweight="bold")
+    bar_colors_b = [scan_color(s) for s in before_scans]
+    ax4a.barh(range(len(names)), [1] * len(names), color=bar_colors_b, alpha=0.7)
+    for i, (n, s) in enumerate(zip(names, before_scans)):
+        ax4a.text(0.02, i, f"{n}:  {s}", va="center", fontsize=8)
+    ax4a.set_yticks([])
+    ax4a.set_xticks([])
+    ax4a.set_xlim(0, 1)
+
+    # After
+    ax4b.set_title("Scan Types AFTER Indexing", fontsize=12, fontweight="bold")
+    bar_colors_a = [scan_color(s) for s in after_scans]
+    ax4b.barh(range(len(names)), [1] * len(names), color=bar_colors_a, alpha=0.7)
+    for i, (n, s) in enumerate(zip(names, after_scans)):
+        ax4b.text(0.02, i, f"{n}:  {s}", va="center", fontsize=8)
+    ax4b.set_yticks([])
+    ax4b.set_xticks([])
+    ax4b.set_xlim(0, 1)
+
+    fig4.suptitle("EXPLAIN ANALYZE: Scan Type Comparison", fontsize=14, fontweight="bold")
+    fig4.tight_layout()
+    chart4_path = os.path.join(charts_dir, "scan_types.png")
+    fig4.savefig(chart4_path, dpi=150)
+    plt.close(fig4)
+    print(f"Chart saved: {chart4_path}")
+
+    # --- Chart 5: EXPLAIN ANALYZE actual time (planning+execution) ---
+    fig5, ax5 = plt.subplots(figsize=(14, 7))
+    ea_before_times = [r.get("planning_time_before_ms", 0) for r in results]
+    ea_after_times = [r.get("planning_time_after_ms", 0) for r in results]
+
+    bars5a = ax5.bar(x - width / 2, ea_before_times, width, label="EXPLAIN ANALYZE Before", color="#F97316", alpha=0.85)
+    bars5b = ax5.bar(x + width / 2, ea_after_times, width, label="EXPLAIN ANALYZE After", color="#3B82F6", alpha=0.85)
+
+    ax5.set_xlabel("Query", fontsize=12)
+    ax5.set_ylabel("EXPLAIN ANALYZE Total Time (ms)", fontsize=12)
+    ax5.set_title("EXPLAIN ANALYZE: Actual Execution Time Before vs After Indexing", fontsize=14, fontweight="bold")
+    ax5.set_xticks(x)
+    ax5.set_xticklabels(names, rotation=35, ha="right", fontsize=9)
+    ax5.legend(fontsize=11)
+    ax5.grid(axis="y", alpha=0.3)
+
+    for bar in bars5a:
+        h = bar.get_height()
+        if h > 0:
+            ax5.annotate(f"{h:.2f}", xy=(bar.get_x() + bar.get_width() / 2, h),
+                         xytext=(0, 3), textcoords="offset points", ha="center", va="bottom", fontsize=7)
+    for bar in bars5b:
+        h = bar.get_height()
+        if h > 0:
+            ax5.annotate(f"{h:.2f}", xy=(bar.get_x() + bar.get_width() / 2, h),
+                         xytext=(0, 3), textcoords="offset points", ha="center", va="bottom", fontsize=7)
+
+    fig5.tight_layout()
+    chart5_path = os.path.join(charts_dir, "explain_analyze_times.png")
+    fig5.savefig(chart5_path, dpi=150)
+    plt.close(fig5)
+    print(f"Chart saved: {chart5_path}")
 
     # Clean up bulk data so it doesn't affect the app
     if bulk_generated:
