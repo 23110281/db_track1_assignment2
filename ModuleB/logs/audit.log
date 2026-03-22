@@ -327,3 +327,7 @@
 [2026-03-22 04:06:21] [INFO] [USER:laksh_jain] [ACTION:CHANGE_PASSWORD] [ENDPOINT:/api/settings/password] [IP:127.0.0.1] — Password changed
 [2026-03-22 04:06:21] [INFO] [USER:laksh_jain] [ACTION:PUT] [ENDPOINT:/api/settings/password] [IP:127.0.0.1] — PUT /api/settings/password -> 200
 [2026-03-22 04:06:33] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully
+[2026-03-22 05:48:40] [INFO] [USER:alumni_rahul] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'alumni_rahul' logged in successfully
+[2026-03-22 05:52:04] [INFO] [USER:admin_user] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'admin_user' logged in successfully
+[2026-03-22 05:52:46] [INFO] [USER:prof_yogesh] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'prof_yogesh' logged in successfully
+[2026-03-22 05:53:44] [INFO] [USER:laksh_jain] [ACTION:LOGIN] [ENDPOINT:/api/auth/login] [IP:127.0.0.1] — User 'laksh_jain' logged in successfully

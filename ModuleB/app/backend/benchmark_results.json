@@ -2,9 +2,9 @@
   {
     "name": "Global Post Feed",
     "description": "Fetch all posts with author info, like/comment counts, ordered by date",
-    "time_before_ms": 0.3046,
-    "time_after_ms": 0.2109,
-    "speedup_pct": 30.75,
+    "time_before_ms": 3112.3159,
+    "time_after_ms": 12.7391,
+    "speedup_pct": 99.59,
     "explain_before": [
       {
         "id": 1,
@@ -12,27 +12,13 @@
         "table": "p",
         "partitions": null,
         "type": "ALL",
-        "possible_keys": "AuthorID",
+        "possible_keys": null,
         "key": null,
         "key_len": null,
         "ref": null,
-        "rows": 8,
+        "rows": 2017,
         "filtered": 100.0,
         "Extra": "Using where; Using filesort"
-      },
-      {
-        "id": 1,
-        "select_type": "PRIMARY",
-        "table": "g",
-        "partitions": null,
-        "type": "eq_ref",
-        "possible_keys": "PRIMARY",
-        "key": "PRIMARY",
-        "key_len": "4",
-        "ref": "iitgn_connect.p.GroupID",
-        "rows": 1,
-        "filtered": 100.0,
-        "Extra": null
       },
       {
         "id": 1,
@@ -49,32 +35,46 @@
         "Extra": null
       },
       {
+        "id": 1,
+        "select_type": "PRIMARY",
+        "table": "g",
+        "partitions": null,
+        "type": "eq_ref",
+        "possible_keys": "PRIMARY",
+        "key": "PRIMARY",
+        "key_len": "4",
+        "ref": "iitgn_connect.p.GroupID",
+        "rows": 1,
+        "filtered": 100.0,
+        "Extra": null
+      },
+      {
         "id": 3,
         "select_type": "DEPENDENT SUBQUERY",
         "table": "Comment",
         "partitions": null,
-        "type": "ref",
-        "possible_keys": "PostID",
-        "key": "PostID",
-        "key_len": "4",
-        "ref": "iitgn_connect.p.PostID",
-        "rows": 1,
-        "filtered": 100.0,
-        "Extra": "Using index"
+        "type": "ALL",
+        "possible_keys": null,
+        "key": null,
+        "key_len": null,
+        "ref": null,
+        "rows": 4996,
+        "filtered": 10.0,
+        "Extra": "Using where"
       },
       {
         "id": 2,
         "select_type": "DEPENDENT SUBQUERY",
         "table": "PostLike",
         "partitions": null,
-        "type": "ref",
-        "possible_keys": "PRIMARY",
-        "key": "PRIMARY",
+        "type": "index",
+        "possible_keys": null,
+        "key": "fk_PostLike_MemberID",
         "key_len": "4",
-        "ref": "iitgn_connect.p.PostID",
-        "rows": 2,
-        "filtered": 100.0,
-        "Extra": "Using index"
+        "ref": null,
+        "rows": 7957,
+        "filtered": 10.0,
+        "Extra": "Using where; Using index"
       }
     ],
     "explain_after": [
@@ -84,27 +84,13 @@
         "table": "p",
         "partitions": null,
         "type": "ALL",
-        "possible_keys": "AuthorID",
+        "possible_keys": "fk_Post_AuthorID,idx_post_authorid,idx_post_authorid_createdat",
         "key": null,
         "key_len": null,
         "ref": null,
-        "rows": 8,
+        "rows": 2017,
         "filtered": 100.0,
         "Extra": "Using where; Using filesort"
-      },
-      {
-        "id": 1,
-        "select_type": "PRIMARY",
-        "table": "g",
-        "partitions": null,
-        "type": "eq_ref",
-        "possible_keys": "PRIMARY",
-        "key": "PRIMARY",
-        "key_len": "4",
-        "ref": "iitgn_connect.p.GroupID",
-        "rows": 1,
-        "filtered": 100.0,
-        "Extra": null
       },
       {
         "id": 1,
@@ -121,16 +107,30 @@
         "Extra": null
       },
       {
+        "id": 1,
+        "select_type": "PRIMARY",
+        "table": "g",
+        "partitions": null,
+        "type": "eq_ref",
+        "possible_keys": "PRIMARY",
+        "key": "PRIMARY",
+        "key_len": "4",
+        "ref": "iitgn_connect.p.GroupID",
+        "rows": 1,
+        "filtered": 100.0,
+        "Extra": null
+      },
+      {
         "id": 3,
         "select_type": "DEPENDENT SUBQUERY",
         "table": "Comment",
         "partitions": null,
         "type": "ref",
-        "possible_keys": "PostID",
-        "key": "PostID",
+        "possible_keys": "fk_Comment_PostID,idx_comment_postid_createdat,idx_comment_postid",
+        "key": "fk_Comment_PostID",
         "key_len": "4",
         "ref": "iitgn_connect.p.PostID",
-        "rows": 1,
+        "rows": 2,
         "filtered": 100.0,
         "Extra": "Using index"
       },
@@ -140,37 +140,37 @@
         "table": "PostLike",
         "partitions": null,
         "type": "ref",
-        "possible_keys": "PRIMARY",
-        "key": "PRIMARY",
+        "possible_keys": "PRIMARY,fk_PostLike_PostID",
+        "key": "fk_PostLike_PostID",
         "key_len": "4",
         "ref": "iitgn_connect.p.PostID",
-        "rows": 2,
+        "rows": 4,
         "filtered": 100.0,
         "Extra": "Using index"
       }
     ],
-    "explain_before_summary": "p: type=ALL, key=None, rows=8, extra=Using where; Using filesort | g: type=eq_ref, key=PRIMARY, rows=1, extra=None | m: type=eq_ref, key=PRIMARY, rows=1, extra=None | Comment: type=ref, key=PostID, rows=1, extra=Using index | PostLike: type=ref, key=PRIMARY, rows=2, extra=Using index",
-    "explain_after_summary": "p: type=ALL, key=None, rows=8, extra=Using where; Using filesort | g: type=eq_ref, key=PRIMARY, rows=1, extra=None | m: type=eq_ref, key=PRIMARY, rows=1, extra=None | Comment: type=ref, key=PostID, rows=1, extra=Using index | PostLike: type=ref, key=PRIMARY, rows=2, extra=Using index"
+    "explain_before_summary": "p: type=ALL, key=None, rows=2017, extra=Using where; Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None | g: type=eq_ref, key=PRIMARY, rows=1, extra=None | Comment: type=ALL, key=None, rows=4996, extra=Using where | PostLike: type=index, key=fk_PostLike_MemberID, rows=7957, extra=Using where; Using index",
+    "explain_after_summary": "p: type=ALL, key=None, rows=2017, extra=Using where; Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None | g: type=eq_ref, key=PRIMARY, rows=1, extra=None | Comment: type=ref, key=fk_Comment_PostID, rows=2, extra=Using index | PostLike: type=ref, key=fk_PostLike_PostID, rows=4, extra=Using index"
   },
   {
     "name": "Group Posts",
     "description": "Posts for a specific group with counts, ordered by date",
-    "time_before_ms": 0.1379,
-    "time_after_ms": 0.1344,
-    "speedup_pct": 2.59,
+    "time_before_ms": 551.6156,
+    "time_after_ms": 2.1973,
+    "speedup_pct": 99.6,
     "explain_before": [
       {
         "id": 1,
         "select_type": "PRIMARY",
         "table": "p",
         "partitions": null,
-        "type": "ref",
-        "possible_keys": "AuthorID,GroupID",
-        "key": "GroupID",
-        "key_len": "5",
-        "ref": "const",
-        "rows": 1,
-        "filtered": 100.0,
+        "type": "ALL",
+        "possible_keys": "fk_Post_AuthorID,idx_post_authorid,idx_post_authorid_createdat",
+        "key": null,
+        "key_len": null,
+        "ref": null,
+        "rows": 2017,
+        "filtered": 16.67,
         "Extra": "Using where; Using filesort"
       },
       {
@@ -192,28 +192,28 @@
         "select_type": "DEPENDENT SUBQUERY",
         "table": "Comment",
         "partitions": null,
-        "type": "ref",
-        "possible_keys": "PostID",
-        "key": "PostID",
-        "key_len": "4",
-        "ref": "iitgn_connect.p.PostID",
-        "rows": 1,
-        "filtered": 100.0,
-        "Extra": "Using index"
+        "type": "ALL",
+        "possible_keys": null,
+        "key": null,
+        "key_len": null,
+        "ref": null,
+        "rows": 4996,
+        "filtered": 10.0,
+        "Extra": "Using where"
       },
       {
         "id": 2,
         "select_type": "DEPENDENT SUBQUERY",
         "table": "PostLike",
         "partitions": null,
-        "type": "ref",
-        "possible_keys": "PRIMARY",
-        "key": "PRIMARY",
+        "type": "index",
+        "possible_keys": null,
+        "key": "fk_PostLike_MemberID",
         "key_len": "4",
-        "ref": "iitgn_connect.p.PostID",
-        "rows": 2,
-        "filtered": 100.0,
-        "Extra": "Using index"
+        "ref": null,
+        "rows": 7957,
+        "filtered": 10.0,
+        "Extra": "Using where; Using index"
       }
     ],
     "explain_after": [
@@ -223,13 +223,13 @@
         "table": "p",
         "partitions": null,
         "type": "ref",
-        "possible_keys": "AuthorID,GroupID",
-        "key": "GroupID",
+        "possible_keys": "fk_Post_AuthorID,fk_Post_GroupID,idx_post_authorid,idx_post_groupid_createdat,idx_post_groupid,idx_post_authorid_createdat",
+        "key": "idx_post_groupid_createdat",
         "key_len": "5",
         "ref": "const",
-        "rows": 1,
+        "rows": 342,
         "filtered": 100.0,
-        "Extra": "Using where; Using filesort"
+        "Extra": "Using where"
       },
       {
         "id": 1,
@@ -251,11 +251,11 @@
         "table": "Comment",
         "partitions": null,
         "type": "ref",
-        "possible_keys": "PostID",
-        "key": "PostID",
+        "possible_keys": "fk_Comment_PostID,idx_comment_postid_createdat,idx_comment_postid",
+        "key": "fk_Comment_PostID",
         "key_len": "4",
         "ref": "iitgn_connect.p.PostID",
-        "rows": 1,
+        "rows": 2,
         "filtered": 100.0,
         "Extra": "Using index"
       },
@@ -265,38 +265,38 @@
         "table": "PostLike",
         "partitions": null,
         "type": "ref",
-        "possible_keys": "PRIMARY",
-        "key": "PRIMARY",
+        "possible_keys": "PRIMARY,fk_PostLike_PostID",
+        "key": "fk_PostLike_PostID",
         "key_len": "4",
         "ref": "iitgn_connect.p.PostID",
-        "rows": 2,
+        "rows": 4,
         "filtered": 100.0,
         "Extra": "Using index"
       }
     ],
-    "explain_before_summary": "p: type=ref, key=GroupID, rows=1, extra=Using where; Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None | Comment: type=ref, key=PostID, rows=1, extra=Using index | PostLike: type=ref, key=PRIMARY, rows=2, extra=Using index",
-    "explain_after_summary": "p: type=ref, key=GroupID, rows=1, extra=Using where; Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None | Comment: type=ref, key=PostID, rows=1, extra=Using index | PostLike: type=ref, key=PRIMARY, rows=2, extra=Using index"
+    "explain_before_summary": "p: type=ALL, key=None, rows=2017, extra=Using where; Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None | Comment: type=ALL, key=None, rows=4996, extra=Using where | PostLike: type=index, key=fk_PostLike_MemberID, rows=7957, extra=Using where; Using index",
+    "explain_after_summary": "p: type=ref, key=idx_post_groupid_createdat, rows=342, extra=Using where | m: type=eq_ref, key=PRIMARY, rows=1, extra=None | Comment: type=ref, key=fk_Comment_PostID, rows=2, extra=Using index | PostLike: type=ref, key=fk_PostLike_PostID, rows=4, extra=Using index"
   },
   {
     "name": "Post Comments",
     "description": "All comments for a post with author details, ordered chronologically",
-    "time_before_ms": 0.1124,
-    "time_after_ms": 0.1111,
-    "speedup_pct": 1.16,
+    "time_before_ms": 1.6639,
+    "time_after_ms": 0.1386,
+    "speedup_pct": 91.67,
     "explain_before": [
       {
         "id": 1,
         "select_type": "SIMPLE",
         "table": "c",
         "partitions": null,
-        "type": "ref",
-        "possible_keys": "PostID,AuthorID",
-        "key": "PostID",
-        "key_len": "4",
-        "ref": "const",
-        "rows": 3,
-        "filtered": 100.0,
-        "Extra": "Using filesort"
+        "type": "ALL",
+        "possible_keys": null,
+        "key": null,
+        "key_len": null,
+        "ref": null,
+        "rows": 4996,
+        "filtered": 0.05,
+        "Extra": "Using where; Using filesort"
       },
       {
         "id": 1,
@@ -320,13 +320,13 @@
         "table": "c",
         "partitions": null,
         "type": "ref",
-        "possible_keys": "PostID,AuthorID",
-        "key": "PostID",
+        "possible_keys": "fk_Comment_PostID,fk_Comment_AuthorID,idx_comment_postid_createdat,idx_comment_postid,idx_comment_authorid",
+        "key": "idx_comment_postid_createdat",
         "key_len": "4",
         "ref": "const",
-        "rows": 3,
+        "rows": 1,
         "filtered": 100.0,
-        "Extra": "Using filesort"
+        "Extra": null
       },
       {
         "id": 1,
@@ -343,29 +343,29 @@
         "Extra": null
       }
     ],
-    "explain_before_summary": "c: type=ref, key=PostID, rows=3, extra=Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None",
-    "explain_after_summary": "c: type=ref, key=PostID, rows=3, extra=Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None"
+    "explain_before_summary": "c: type=ALL, key=None, rows=4996, extra=Using where; Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None",
+    "explain_after_summary": "c: type=ref, key=idx_comment_postid_createdat, rows=1, extra=None | m: type=eq_ref, key=PRIMARY, rows=1, extra=None"
   },
   {
     "name": "User Profile Posts",
     "description": "Recent posts by a member for profile page",
-    "time_before_ms": 0.1257,
-    "time_after_ms": 0.1248,
-    "speedup_pct": 0.71,
+    "time_before_ms": 9.5662,
+    "time_after_ms": 0.2397,
+    "speedup_pct": 97.49,
     "explain_before": [
       {
         "id": 1,
         "select_type": "PRIMARY",
         "table": "p",
         "partitions": null,
-        "type": "ref",
-        "possible_keys": "AuthorID",
-        "key": "AuthorID",
-        "key_len": "4",
-        "ref": "const",
-        "rows": 1,
-        "filtered": 100.0,
-        "Extra": "Using filesort"
+        "type": "index",
+        "possible_keys": null,
+        "key": "idx_post_createdat",
+        "key_len": "5",
+        "ref": null,
+        "rows": 10,
+        "filtered": 10.0,
+        "Extra": "Using where"
       },
       {
         "id": 1,
@@ -387,11 +387,11 @@
         "table": "Comment",
         "partitions": null,
         "type": "ref",
-        "possible_keys": "PostID",
-        "key": "PostID",
+        "possible_keys": "idx_comment_postid_createdat",
+        "key": "idx_comment_postid_createdat",
         "key_len": "4",
         "ref": "iitgn_connect.p.PostID",
-        "rows": 1,
+        "rows": 2,
         "filtered": 100.0,
         "Extra": "Using index"
       },
@@ -400,14 +400,14 @@
         "select_type": "DEPENDENT SUBQUERY",
         "table": "PostLike",
         "partitions": null,
-        "type": "ref",
-        "possible_keys": "PRIMARY",
-        "key": "PRIMARY",
+        "type": "index",
+        "possible_keys": null,
+        "key": "fk_PostLike_MemberID",
         "key_len": "4",
-        "ref": "iitgn_connect.p.PostID",
-        "rows": 2,
-        "filtered": 100.0,
-        "Extra": "Using index"
+        "ref": null,
+        "rows": 7957,
+        "filtered": 10.0,
+        "Extra": "Using where; Using index"
       }
     ],
     "explain_after": [
@@ -417,13 +417,13 @@
         "table": "p",
         "partitions": null,
         "type": "ref",
-        "possible_keys": "AuthorID",
-        "key": "AuthorID",
+        "possible_keys": "fk_Post_AuthorID,idx_post_authorid,idx_post_authorid_createdat",
+        "key": "idx_post_authorid_createdat",
         "key_len": "4",
         "ref": "const",
-        "rows": 1,
+        "rows": 19,
         "filtered": 100.0,
-        "Extra": "Using filesort"
+        "Extra": null
       },
       {
         "id": 1,
@@ -445,11 +445,11 @@
         "table": "Comment",
         "partitions": null,
         "type": "ref",
-        "possible_keys": "PostID",
-        "key": "PostID",
+        "possible_keys": "fk_Comment_PostID,idx_comment_postid_createdat,idx_comment_postid",
+        "key": "fk_Comment_PostID",
         "key_len": "4",
         "ref": "iitgn_connect.p.PostID",
-        "rows": 1,
+        "rows": 2,
         "filtered": 100.0,
         "Extra": "Using index"
       },
@@ -459,52 +459,52 @@
         "table": "PostLike",
         "partitions": null,
         "type": "ref",
-        "possible_keys": "PRIMARY",
-        "key": "PRIMARY",
+        "possible_keys": "PRIMARY,fk_PostLike_PostID",
+        "key": "fk_PostLike_PostID",
         "key_len": "4",
         "ref": "iitgn_connect.p.PostID",
-        "rows": 2,
+        "rows": 4,
         "filtered": 100.0,
         "Extra": "Using index"
       }
     ],
-    "explain_before_summary": "p: type=ref, key=AuthorID, rows=1, extra=Using filesort | g: type=eq_ref, key=PRIMARY, rows=1, extra=None | Comment: type=ref, key=PostID, rows=1, extra=Using index | PostLike: type=ref, key=PRIMARY, rows=2, extra=Using index",
-    "explain_after_summary": "p: type=ref, key=AuthorID, rows=1, extra=Using filesort | g: type=eq_ref, key=PRIMARY, rows=1, extra=None | Comment: type=ref, key=PostID, rows=1, extra=Using index | PostLike: type=ref, key=PRIMARY, rows=2, extra=Using index"
+    "explain_before_summary": "p: type=index, key=idx_post_createdat, rows=10, extra=Using where | g: type=eq_ref, key=PRIMARY, rows=1, extra=None | Comment: type=ref, key=idx_comment_postid_createdat, rows=2, extra=Using index | PostLike: type=index, key=fk_PostLike_MemberID, rows=7957, extra=Using where; Using index",
+    "explain_after_summary": "p: type=ref, key=idx_post_authorid_createdat, rows=19, extra=None | g: type=eq_ref, key=PRIMARY, rows=1, extra=None | Comment: type=ref, key=fk_Comment_PostID, rows=2, extra=Using index | PostLike: type=ref, key=fk_PostLike_PostID, rows=4, extra=Using index"
   },
   {
     "name": "Class Attendance",
     "description": "Monthly class attendance with course info for a student",
-    "time_before_ms": 0.1623,
-    "time_after_ms": 0.1579,
-    "speedup_pct": 2.73,
+    "time_before_ms": 3.4551,
+    "time_after_ms": 0.8443,
+    "speedup_pct": 75.56,
     "explain_before": [
-      {
-        "id": 1,
-        "select_type": "SIMPLE",
-        "table": "ca",
-        "partitions": null,
-        "type": "ref",
-        "possible_keys": "CourseID,StudentID",
-        "key": "StudentID",
-        "key_len": "4",
-        "ref": "const",
-        "rows": 20,
-        "filtered": 100.0,
-        "Extra": "Using where; Using filesort"
-      },
       {
         "id": 1,
         "select_type": "SIMPLE",
         "table": "c",
         "partitions": null,
-        "type": "eq_ref",
+        "type": "ALL",
         "possible_keys": "PRIMARY",
-        "key": "PRIMARY",
-        "key_len": "4",
-        "ref": "iitgn_connect.ca.CourseID",
-        "rows": 1,
+        "key": null,
+        "key_len": null,
+        "ref": null,
+        "rows": 4,
         "filtered": 100.0,
-        "Extra": null
+        "Extra": "Using temporary; Using filesort"
+      },
+      {
+        "id": 1,
+        "select_type": "SIMPLE",
+        "table": "ca",
+        "partitions": null,
+        "type": "ALL",
+        "possible_keys": null,
+        "key": null,
+        "key_len": null,
+        "ref": null,
+        "rows": 12349,
+        "filtered": 0.71,
+        "Extra": "Using where; Using join buffer (hash join)"
       }
     ],
     "explain_after": [
@@ -514,13 +514,13 @@
         "table": "ca",
         "partitions": null,
         "type": "ref",
-        "possible_keys": "CourseID,StudentID",
-        "key": "StudentID",
+        "possible_keys": "fk_ClassAttendance_CourseID,fk_ClassAttendance_StudentID,idx_classattendance_studentid_date,idx_classattendance_courseid",
+        "key": "idx_classattendance_studentid_date",
         "key_len": "4",
         "ref": "const",
-        "rows": 20,
+        "rows": 1062,
         "filtered": 100.0,
-        "Extra": "Using where; Using filesort"
+        "Extra": "Using index condition"
       },
       {
         "id": 1,
@@ -537,28 +537,28 @@
         "Extra": null
       }
     ],
-    "explain_before_summary": "ca: type=ref, key=StudentID, rows=20, extra=Using where; Using filesort | c: type=eq_ref, key=PRIMARY, rows=1, extra=None",
-    "explain_after_summary": "ca: type=ref, key=StudentID, rows=20, extra=Using where; Using filesort | c: type=eq_ref, key=PRIMARY, rows=1, extra=None"
+    "explain_before_summary": "c: type=ALL, key=None, rows=4, extra=Using temporary; Using filesort | ca: type=ALL, key=None, rows=12349, extra=Using where; Using join buffer (hash join)",
+    "explain_after_summary": "ca: type=ref, key=idx_classattendance_studentid_date, rows=1062, extra=Using index condition | c: type=eq_ref, key=PRIMARY, rows=1, extra=None"
   },
   {
     "name": "Mess Attendance",
     "description": "Monthly mess attendance records for a student",
-    "time_before_ms": 0.2563,
-    "time_after_ms": 0.2545,
-    "speedup_pct": 0.72,
+    "time_before_ms": 2.7743,
+    "time_after_ms": 1.0509,
+    "speedup_pct": 62.12,
     "explain_before": [
       {
         "id": 1,
         "select_type": "SIMPLE",
         "table": "MessAttendance",
         "partitions": null,
-        "type": "ref",
-        "possible_keys": "StudentID",
-        "key": "StudentID",
-        "key_len": "4",
-        "ref": "const",
-        "rows": 60,
-        "filtered": 100.0,
+        "type": "ALL",
+        "possible_keys": null,
+        "key": null,
+        "key_len": null,
+        "ref": null,
+        "rows": 9731,
+        "filtered": 2.86,
         "Extra": "Using where; Using filesort"
       }
     ],
@@ -569,38 +569,52 @@
         "table": "MessAttendance",
         "partitions": null,
         "type": "ref",
-        "possible_keys": "StudentID",
-        "key": "StudentID",
+        "possible_keys": "fk_MessAttendance_StudentID,idx_messattendance_studentid_date",
+        "key": "fk_MessAttendance_StudentID",
         "key_len": "4",
         "ref": "const",
-        "rows": 60,
+        "rows": 791,
         "filtered": 100.0,
         "Extra": "Using where; Using filesort"
       }
     ],
-    "explain_before_summary": "MessAttendance: type=ref, key=StudentID, rows=60, extra=Using where; Using filesort",
-    "explain_after_summary": "MessAttendance: type=ref, key=StudentID, rows=60, extra=Using where; Using filesort"
+    "explain_before_summary": "MessAttendance: type=ALL, key=None, rows=9731, extra=Using where; Using filesort",
+    "explain_after_summary": "MessAttendance: type=ref, key=fk_MessAttendance_StudentID, rows=791, extra=Using where; Using filesort"
   },
   {
     "name": "Job Listings",
     "description": "All job posts with alumni info, ordered by posting date",
-    "time_before_ms": 0.1508,
-    "time_after_ms": 0.1503,
-    "speedup_pct": 0.28,
+    "time_before_ms": 0.6842,
+    "time_after_ms": 0.7084,
+    "speedup_pct": -3.54,
     "explain_before": [
+      {
+        "id": 1,
+        "select_type": "SIMPLE",
+        "table": "j",
+        "partitions": null,
+        "type": "ALL",
+        "possible_keys": null,
+        "key": null,
+        "key_len": null,
+        "ref": null,
+        "rows": 104,
+        "filtered": 100.0,
+        "Extra": "Using filesort"
+      },
       {
         "id": 1,
         "select_type": "SIMPLE",
         "table": "a",
         "partitions": null,
-        "type": "ALL",
-        "possible_keys": "PRIMARY",
-        "key": null,
-        "key_len": null,
-        "ref": null,
-        "rows": 2,
+        "type": "eq_ref",
+        "possible_keys": "PRIMARY,fk_Alumni_MemberID",
+        "key": "PRIMARY",
+        "key_len": "4",
+        "ref": "iitgn_connect.j.AlumniID",
+        "rows": 1,
         "filtered": 100.0,
-        "Extra": "Using temporary; Using filesort"
+        "Extra": null
       },
       {
         "id": 1,
@@ -611,24 +625,10 @@
         "possible_keys": "PRIMARY",
         "key": "PRIMARY",
         "key_len": "4",
-        "ref": "iitgn_connect.a.MemberID",
+        "ref": "iitgn_connect.j.AlumniID",
         "rows": 1,
         "filtered": 100.0,
         "Extra": null
-      },
-      {
-        "id": 1,
-        "select_type": "SIMPLE",
-        "table": "j",
-        "partitions": null,
-        "type": "ALL",
-        "possible_keys": "idx_jobpost_alumniid",
-        "key": null,
-        "key_len": null,
-        "ref": null,
-        "rows": 4,
-        "filtered": 50.0,
-        "Extra": "Using where; Using join buffer (hash join)"
       }
     ],
     "explain_after": [
@@ -638,11 +638,11 @@
         "table": "a",
         "partitions": null,
         "type": "ALL",
-        "possible_keys": "PRIMARY",
+        "possible_keys": "PRIMARY,fk_Alumni_MemberID",
         "key": null,
         "key_len": null,
         "ref": null,
-        "rows": 2,
+        "rows": 42,
         "filtered": 100.0,
         "Extra": "Using temporary; Using filesort"
       },
@@ -665,39 +665,39 @@
         "select_type": "SIMPLE",
         "table": "j",
         "partitions": null,
-        "type": "ALL",
-        "possible_keys": "idx_jobpost_alumniid",
-        "key": null,
-        "key_len": null,
-        "ref": null,
-        "rows": 4,
-        "filtered": 50.0,
-        "Extra": "Using where; Using join buffer (hash join)"
+        "type": "ref",
+        "possible_keys": "idx_jobpost_alumniid,fk_JobPost_AlumniID",
+        "key": "idx_jobpost_alumniid",
+        "key_len": "4",
+        "ref": "iitgn_connect.a.MemberID",
+        "rows": 2,
+        "filtered": 100.0,
+        "Extra": null
       }
     ],
-    "explain_before_summary": "a: type=ALL, key=None, rows=2, extra=Using temporary; Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None | j: type=ALL, key=None, rows=4, extra=Using where; Using join buffer (hash join)",
-    "explain_after_summary": "a: type=ALL, key=None, rows=2, extra=Using temporary; Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None | j: type=ALL, key=None, rows=4, extra=Using where; Using join buffer (hash join)"
+    "explain_before_summary": "j: type=ALL, key=None, rows=104, extra=Using filesort | a: type=eq_ref, key=PRIMARY, rows=1, extra=None | m: type=eq_ref, key=PRIMARY, rows=1, extra=None",
+    "explain_after_summary": "a: type=ALL, key=None, rows=42, extra=Using temporary; Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None | j: type=ref, key=idx_jobpost_alumniid, rows=2, extra=None"
   },
   {
     "name": "Referral Requests (Alumni)",
     "description": "Referral requests received by an alumni, newest first",
-    "time_before_ms": 0.1048,
-    "time_after_ms": 0.105,
-    "speedup_pct": -0.23,
+    "time_before_ms": 0.2411,
+    "time_after_ms": 0.1332,
+    "speedup_pct": 44.74,
     "explain_before": [
       {
         "id": 1,
         "select_type": "SIMPLE",
         "table": "r",
         "partitions": null,
-        "type": "ref",
-        "possible_keys": "StudentID,TargetAlumniID",
-        "key": "TargetAlumniID",
-        "key_len": "4",
-        "ref": "const",
-        "rows": 2,
-        "filtered": 100.0,
-        "Extra": "Using filesort"
+        "type": "ALL",
+        "possible_keys": null,
+        "key": null,
+        "key_len": null,
+        "ref": null,
+        "rows": 204,
+        "filtered": 2.44,
+        "Extra": "Using where; Using filesort"
       },
       {
         "id": 1,
@@ -721,13 +721,13 @@
         "table": "r",
         "partitions": null,
         "type": "ref",
-        "possible_keys": "StudentID,TargetAlumniID",
-        "key": "TargetAlumniID",
+        "possible_keys": "fk_ReferralRequest_StudentID,fk_ReferralRequest_TargetAlumniID,idx_referral_targetalumniid_requestedat,idx_referral_studentid_requestedat",
+        "key": "idx_referral_targetalumniid_requestedat",
         "key_len": "4",
         "ref": "const",
-        "rows": 2,
+        "rows": 6,
         "filtered": 100.0,
-        "Extra": "Using filesort"
+        "Extra": null
       },
       {
         "id": 1,
@@ -744,15 +744,15 @@
         "Extra": null
       }
     ],
-    "explain_before_summary": "r: type=ref, key=TargetAlumniID, rows=2, extra=Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None",
-    "explain_after_summary": "r: type=ref, key=TargetAlumniID, rows=2, extra=Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None"
+    "explain_before_summary": "r: type=ALL, key=None, rows=204, extra=Using where; Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None",
+    "explain_after_summary": "r: type=ref, key=idx_referral_targetalumniid_requestedat, rows=6, extra=None | m: type=eq_ref, key=PRIMARY, rows=1, extra=None"
   },
   {
     "name": "Polls with Options & Votes",
     "description": "All polls with vote counts per option",
-    "time_before_ms": 0.0991,
-    "time_after_ms": 0.0987,
-    "speedup_pct": 0.37,
+    "time_before_ms": 0.5358,
+    "time_after_ms": 0.5582,
+    "speedup_pct": -4.17,
     "explain_before": [
       {
         "id": 1,
@@ -760,11 +760,11 @@
         "table": "p",
         "partitions": null,
         "type": "ALL",
-        "possible_keys": "idx_poll_creatorid",
+        "possible_keys": null,
         "key": null,
         "key_len": null,
         "ref": null,
-        "rows": 3,
+        "rows": 104,
         "filtered": 100.0,
         "Extra": "Using filesort"
       },
@@ -790,11 +790,11 @@
         "table": "p",
         "partitions": null,
         "type": "ALL",
-        "possible_keys": "idx_poll_creatorid",
+        "possible_keys": "idx_poll_creatorid,fk_Poll_CreatorID",
         "key": null,
         "key_len": null,
         "ref": null,
-        "rows": 3,
+        "rows": 104,
         "filtered": 100.0,
         "Extra": "Using filesort"
       },
@@ -813,15 +813,15 @@
         "Extra": null
       }
     ],
-    "explain_before_summary": "p: type=ALL, key=None, rows=3, extra=Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None",
-    "explain_after_summary": "p: type=ALL, key=None, rows=3, extra=Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None"
+    "explain_before_summary": "p: type=ALL, key=None, rows=104, extra=Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None",
+    "explain_after_summary": "p: type=ALL, key=None, rows=104, extra=Using filesort | m: type=eq_ref, key=PRIMARY, rows=1, extra=None"
   },
   {
     "name": "Member Search by Type",
     "description": "Filter members by type and order by name",
-    "time_before_ms": 0.1184,
-    "time_after_ms": 0.1172,
-    "speedup_pct": 0.98,
+    "time_before_ms": 0.7156,
+    "time_after_ms": 0.7951,
+    "speedup_pct": -11.12,
     "explain_before": [
       {
         "id": 1,
@@ -833,7 +833,7 @@
         "key": null,
         "key_len": null,
         "ref": null,
-        "rows": 12,
+        "rows": 241,
         "filtered": 25.0,
         "Extra": "Using where; Using filesort"
       }
@@ -844,17 +844,17 @@
         "select_type": "SIMPLE",
         "table": "Member",
         "partitions": null,
-        "type": "ALL",
-        "possible_keys": null,
-        "key": null,
-        "key_len": null,
-        "ref": null,
-        "rows": 12,
-        "filtered": 25.0,
-        "Extra": "Using where; Using filesort"
+        "type": "ref",
+        "possible_keys": "idx_member_membertype",
+        "key": "idx_member_membertype",
+        "key_len": "1",
+        "ref": "const",
+        "rows": 155,
+        "filtered": 100.0,
+        "Extra": "Using index condition; Using filesort"
       }
     ],
-    "explain_before_summary": "Member: type=ALL, key=None, rows=12, extra=Using where; Using filesort",
-    "explain_after_summary": "Member: type=ALL, key=None, rows=12, extra=Using where; Using filesort"
+    "explain_before_summary": "Member: type=ALL, key=None, rows=241, extra=Using where; Using filesort",
+    "explain_after_summary": "Member: type=ref, key=idx_member_membertype, rows=155, extra=Using index condition; Using filesort"
   }
 ]

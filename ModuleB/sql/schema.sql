@@ -22,7 +22,12 @@ CREATE TABLE Member (
     ContactNumber VARCHAR(15),
     CreatedAt DATE NOT NULL,
     AvatarColor VARCHAR(10) DEFAULT '#4F46E5',
-    IsAdmin BOOLEAN DEFAULT FALSE
+    IsAdmin BOOLEAN DEFAULT FALSE,
+    Address VARCHAR(255) DEFAULT '',
+    ShowAddress BOOLEAN DEFAULT FALSE,
+    ShowEmail BOOLEAN DEFAULT TRUE,
+    ShowContact BOOLEAN DEFAULT TRUE,
+    AllowQnA BOOLEAN DEFAULT TRUE
 );
 
 -- ------------------------------------------------------------
@@ -267,4 +272,32 @@ CREATE TABLE ProfileClaimVote (
     PRIMARY KEY (ClaimID, VoterID),
     FOREIGN KEY (ClaimID) REFERENCES ProfileClaimQuestion(ClaimID) ON DELETE CASCADE,
     FOREIGN KEY (VoterID) REFERENCES Member(MemberID) ON DELETE CASCADE
+);
+
+-- ------------------------------------------------------------
+-- AuditLog: Tracks all data-modifying API requests and trigger-detected
+-- direct DB modifications for security auditing.
+-- ------------------------------------------------------------
+CREATE TABLE AuditLog (
+    LogID INT AUTO_INCREMENT PRIMARY KEY,
+    Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    Username VARCHAR(100),
+    Action VARCHAR(50),
+    Endpoint VARCHAR(200),
+    IPAddress VARCHAR(50),
+    Details TEXT,
+    IsAuthorized BOOLEAN DEFAULT TRUE
+);
+
+-- ------------------------------------------------------------
+-- OTPVerification: Stores one-time passwords for email verification
+-- (used for password reset and username change).
+-- ------------------------------------------------------------
+CREATE TABLE OTPVerification (
+    OTPID INT AUTO_INCREMENT PRIMARY KEY,
+    Email VARCHAR(200) NOT NULL,
+    OTPCode VARCHAR(6) NOT NULL,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ExpiresAt DATETIME NOT NULL,
+    Verified BOOLEAN DEFAULT FALSE
 );
