@@ -488,7 +488,7 @@ jupyter notebook report.ipynb
 
 ## 5. Video Walkthrough
 
-> **Video Link:** [INSERT YOUR VIDEO LINK HERE]
+> **Video Link:** [ VIDEO LINK WILL BE ADDED ]
 
 The video demonstration covers:
 1. **UI & API Functionality** — Walkthrough of all features: login, feed, posts, comments, likes, groups, polls, jobs, referrals, attendance, profiles, settings
@@ -505,6 +505,8 @@ The video demonstration covers:
 - Parthiv Patel
 - Shriniket Behera
 - Ridham Patel
+- Laksh Jain
+- Rudra Pratap Singh
 
 **Course:** CS 432 — Databases (Semester II, 2025-2026)
 **Institute:** Indian Institute of Technology, Gandhinagar

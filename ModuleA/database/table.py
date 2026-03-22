@@ -14,7 +14,7 @@ class Table:
             raise ValueError(f"Record must contain search key: {self.search_key}")
         for field, schema_type in self.schema.items():
             if field in record:
-                # Add specialized schema checking here if needed
+                # We can add specialized schema checking here if needed
                 pass
         return True
 
