@@ -505,6 +505,8 @@ The video demonstration covers:
 - Parthiv Patel
 - Shriniket Behera
 - Ridham Patel
+- Laksh Jain
+- Rudra Pratap Singh
 
 **Course:** CS 432 — Databases (Semester II, 2025-2026)
 **Institute:** Indian Institute of Technology, Gandhinagar
